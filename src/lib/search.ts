@@ -11,39 +11,115 @@ let cachedUserLocation: { lat: number; lng: number; timestamp: number } | null =
 const LOCATION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export function initializeSearch(stores: ProcessedBookstore[]) {
+  if (!stores || stores.length === 0) {
+    console.warn('initializeSearch called with empty stores array');
+    return;
+  }
+  
+  console.log(`Initializing search with ${stores.length} stores`);
+  
   const options = {
     keys: ['name', 'address', 'city', 'province'],
     threshold: 0.3,
     includeScore: true,
   };
-  fuse = new Fuse(stores, options);
   
-  // Pre-populate caches for better performance
-  stores.forEach(store => {
-    const storeId = store.place_id || store.name;
+  try {
+    fuse = new Fuse(stores, options);
+    console.log('Fuse search initialized successfully');
     
-    // Cache weekend status
-    if (!weekendStatusCache.has(storeId)) {
-      weekendStatusCache.set(storeId, isOpenWeekends(store));
-    }
-    
-    // Cache rating
-    if (!ratingCache.has(storeId) && store.ratingInfo?.rating) {
-      const rating = store.ratingInfo.rating;
-      if (!isNaN(rating)) {
-        ratingCache.set(storeId, rating);
+    // Pre-populate caches for better performance
+    stores.forEach(store => {
+      const storeId = store.place_id || store.name;
+      
+      // Cache weekend status
+      if (!weekendStatusCache.has(storeId)) {
+        weekendStatusCache.set(storeId, isOpenWeekends(store));
       }
-    }
-  });
+      
+      // Cache rating
+      if (!ratingCache.has(storeId) && store.ratingInfo?.rating) {
+        const rating = store.ratingInfo.rating;
+        if (!isNaN(rating)) {
+          ratingCache.set(storeId, rating);
+        }
+      }
+    });
+    
+    console.log(`Cached data for ${weekendStatusCache.size} stores`);
+  } catch (error) {
+    console.error('Error initializing search:', error);
+  }
 }
 
 export function getSearchSuggestions(stores: ProcessedBookstore[], query: string): string[] {
   if (!query) return [];
   
+  if (!fuse) {
+    console.warn('Fuse not initialized, falling back to simple search for suggestions');
+    return stores
+      .filter(store => store.name.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 5)
+      .map(store => store.name);
+  }
+  
   const results = fuse.search(query);
   return results
     .slice(0, 5)
     .map(result => result.item.name);
+}
+
+// Simple search function for map view (text search only)
+export async function searchStoresText(stores: ProcessedBookstore[], query: string): Promise<ProcessedBookstore[]> {
+  console.log(`searchStoresText called with ${stores.length} stores, query: "${query}"`);
+  
+  if (!stores || stores.length === 0) {
+    console.warn('searchStoresText called with empty stores array');
+    return [];
+  }
+  
+  // If no query, return all stores
+  if (!query || !query.trim()) {
+    console.log('No query provided, returning all stores');
+    return stores;
+  }
+  
+  // Ensure fuse is initialized
+  if (!fuse) {
+    console.log('Fuse not initialized, initializing now...');
+    initializeSearch(stores);
+  }
+  
+  // Perform search
+  let results: ProcessedBookstore[];
+  
+  if (!fuse) {
+    console.error('Fuse search not available, falling back to simple filter');
+    results = stores.filter(store => 
+      store.name.toLowerCase().includes(query.toLowerCase()) ||
+      store.city.toLowerCase().includes(query.toLowerCase()) ||
+      store.province.toLowerCase().includes(query.toLowerCase()) ||
+      store.address.toLowerCase().includes(query.toLowerCase())
+    );
+  } else {
+    results = fuse.search(query).map(result => result.item);
+  }
+  
+  console.log(`Text search for "${query}" returned ${results.length} results`);
+  
+  // Ensure results have valid coordinates
+  const validResults = results.filter(store => {
+    const lat = parseFloat(store.lat);
+    const lng = parseFloat(store.lng);
+    const hasValidCoords = !isNaN(lat) && !isNaN(lng);
+    if (!hasValidCoords) {
+      console.warn(`Store ${store.name} has invalid coordinates: [${store.lat}, ${store.lng}]`);
+    }
+    return hasValidCoords;
+  });
+  
+  console.log(`Filtered to ${validResults.length} stores with valid coordinates`);
+  return validResults;
 }
 
 function isOpenWeekends(store: ProcessedBookstore): boolean {
@@ -84,22 +160,25 @@ function getCachedRating(store: ProcessedBookstore): number {
 async function getCachedLocation(): Promise<{ lat: number; lng: number } | null> {
   // Check if cached location is still valid
   if (cachedUserLocation && (Date.now() - cachedUserLocation.timestamp) < LOCATION_CACHE_DURATION) {
+    console.log('💾 Using cached user location:', cachedUserLocation);
     return { lat: cachedUserLocation.lat, lng: cachedUserLocation.lng };
   }
   
   // Get fresh location
   if (!navigator.geolocation) {
+    console.log('❌ Geolocation not supported');
     return null;
   }
   
   try {
+    console.log('🔄 Getting fresh user location...');
     const position = await new Promise<GeolocationPosition>((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         resolve, 
         reject,
         { 
-          timeout: 10000, // 10 second timeout
-          maximumAge: 300000, // Accept 5-minute-old position
+          timeout: 15000, // 15 second timeout
+          maximumAge: 60000, // Accept 1-minute-old position for faster results
           enableHighAccuracy: false // Faster, less battery drain
         }
       );
@@ -111,9 +190,10 @@ async function getCachedLocation(): Promise<{ lat: number; lng: number } | null>
       timestamp: Date.now()
     };
     
+    console.log('✅ Got fresh user location:', cachedUserLocation);
     return { lat: cachedUserLocation.lat, lng: cachedUserLocation.lng };
   } catch (error) {
-    console.error('Error getting user location:', error);
+    console.error('❌ Error getting user location for distance filtering:', error);
     return null;
   }
 }
@@ -131,19 +211,49 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export async function searchStores(stores: ProcessedBookstore[], query: string, filters: StoreFilters): Promise<ProcessedBookstore[]> {
-  // Get user location first if distance filter is active
-  let userLocation: { lat: number; lng: number } | null = null;
-  if (filters.maxDistance) {
-    userLocation = await getCachedLocation();
+  console.log(`searchStores called with ${stores.length} stores, query: "${query}", filters:`, filters);
+  
+  if (!stores || stores.length === 0) {
+    console.warn('searchStores called with empty stores array');
+    return [];
   }
+  
+  // Ensure fuse is initialized only once per session
+  if (!fuse) {
+    console.log('Fuse not initialized, initializing now...');
+    initializeSearch(stores);
+  }
+  
+  // Distance filtering removed - simpler approach with city-level zoom
 
   // Start with all stores or search results
-  let results = query
-    ? fuse.search(query).map(result => result.item)
-    : [...stores];
+  let results: ProcessedBookstore[];
+  
+  if (query && query.trim()) {
+    if (!fuse) {
+      console.error('Fuse search not available, falling back to simple filter');
+      results = stores.filter(store => 
+        store.name.toLowerCase().includes(query.toLowerCase()) ||
+        store.city.toLowerCase().includes(query.toLowerCase()) ||
+        store.province.toLowerCase().includes(query.toLowerCase())
+      );
+    } else {
+      results = fuse.search(query).map(result => result.item);
+    }
+    console.log(`Text search for "${query}" returned ${results.length} results`);
+  } else {
+    results = [...stores];
+    console.log(`No text search, starting with all ${results.length} stores`);
+  }
 
   // Apply filters with optimized functions
-  results = results.filter(store => {
+  const filteredResults = results.filter(store => {
+    // Validate store has required fields
+    if (!store.lat || !store.lng || !store.name) {
+      console.warn('Store missing required fields:', store);
+      return false;
+    }
+    
     // Basic filters
     if (filters.hasWebsite && !store.website) return false;
     
@@ -156,16 +266,7 @@ export async function searchStores(stores: ProcessedBookstore[], query: string, 
     // Province filter
     if (filters.province && store.province !== filters.province) return false;
 
-    // Distance filter
-    if (filters.maxDistance && userLocation) {
-      const distance = calculateDistance(
-        userLocation.lat,
-        userLocation.lng,
-        parseFloat(store.lat),
-        parseFloat(store.lng)
-      );
-      if (distance > filters.maxDistance) return false;
-    }
+    // Distance filtering removed - users can manually zoom to explore areas
 
     // Hours filters with cached results
     if (filters.openWeekends && !isOpenWeekends(store)) return false;
@@ -173,7 +274,8 @@ export async function searchStores(stores: ProcessedBookstore[], query: string, 
     return true;
   });
 
-  return results;
+  console.log(`After filtering: ${filteredResults.length} stores remaining`);
+  return filteredResults;
 }
 
 // Utility function to clear caches if needed

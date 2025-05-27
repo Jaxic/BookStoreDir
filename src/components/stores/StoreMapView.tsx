@@ -1,56 +1,87 @@
 /** @jsxImportSource react */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { ProcessedBookstore } from '../../types/bookstore';
-import type { StoreFilters } from './StoreSearch';
 import StoreMap from '../map/StoreMap';
-import StoreSearch from './StoreSearch';
-import StoreDetails from './StoreDetails';
-import { searchStores } from '../../lib/search';
+import StoreMapSearch from './StoreMapSearch';
+import { searchStoresText, initializeSearch } from '../../lib/search';
 
 interface StoreMapViewProps {
   stores: ProcessedBookstore[];
 }
 
 export default function StoreMapView({ stores }: StoreMapViewProps) {
+  console.log('StoreMapView received stores:', stores.length);
   const [filteredStores, setFilteredStores] = useState<ProcessedBookstore[]>(stores);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<StoreFilters>({
-    hasWebsite: false,
-    minRating: 0,
-    province: '',
-    maxDistance: null,
-    openWeekends: false,
-  });
-  const [selectedStore, setSelectedStore] = useState<ProcessedBookstore | null>(null);
   const [isSearchCollapsed, setIsSearchCollapsed] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
 
-  // Filter stores based on search and filters
-  const updateFilteredStores = async (query: string, storeFilters: StoreFilters) => {
+  // Initialize search and apply initial filters
+  useEffect(() => {
+    if (stores.length > 0) {
+      console.log('=== STOREMAPVIEW INITIALIZATION ===');
+      console.log('Raw stores received:', stores.length);
+      console.log('Sample store data:', {
+        name: stores[0]?.name,
+        lat: stores[0]?.lat,
+        lng: stores[0]?.lng,
+        coordinates: stores[0]?.coordinates
+      });
+      
+      console.log('Initializing search with', stores.length, 'stores');
+      initializeSearch(stores);
+      
+      // Start with all stores
+      setFilteredStores(stores);
+    }
+  }, [stores]);
+
+  // Filter stores based on search query only
+  const updateFilteredStores = async (query: string) => {
+    console.log('=== UPDATEFILTEREDSTORES CALLED ===');
+    console.log('Query:', query);
+    console.log('Input stores count:', stores.length);
+    
+    // Prevent concurrent filter operations
+    if (isFiltering) {
+      console.log('Already filtering, skipping...');
+      return;
+    }
+    
+    setIsFiltering(true);
     try {
-      const results = await searchStores(stores, query, storeFilters);
+      // Add a small delay to prevent rapid successive calls
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      const results = await searchStoresText(stores, query);
+      console.log('Search results count:', results.length);
+      console.log('Sample result:', results[0] ? {
+        name: results[0].name,
+        lat: results[0].lat,
+        lng: results[0].lng,
+        coordinates: results[0].coordinates,
+        place_id: results[0].place_id
+      } : 'No results');
+      
       setFilteredStores(results);
     } catch (error) {
       console.error('Error filtering stores:', error);
-      setFilteredStores(stores);
+      // Fallback to original stores with valid coordinates
+      const validStores = stores.filter(store => {
+        const lat = parseFloat(store.lat);
+        const lng = parseFloat(store.lng);
+        return !isNaN(lat) && !isNaN(lng);
+      });
+      setFilteredStores(validStores);
+    } finally {
+      setIsFiltering(false);
     }
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = (query: string) => {
+    console.log('handleSearch called with query:', query);
     setSearchQuery(query);
-    await updateFilteredStores(query, filters);
-  };
-
-  const handleFilterChange = async (newFilters: StoreFilters) => {
-    setFilters(newFilters);
-    await updateFilteredStores(searchQuery, newFilters);
-  };
-
-  const handleStoreSelect = (store: ProcessedBookstore) => {
-    setSelectedStore(store);
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedStore(null);
+    updateFilteredStores(query);
   };
 
   const toggleSearchCollapse = () => {
@@ -64,13 +95,13 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Search Panel - Collapsible on mobile */}
-      <div className={`bg-white border-b border-gray-200 transition-all duration-300 ${isSearchCollapsed ? 'h-16' : 'h-auto'} relative z-20`}>
+      <div className={`bg-white border-b border-gray-200 transition-all duration-300 ${isSearchCollapsed ? 'h-16' : 'h-auto'} relative z-50`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header with toggle button */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Bookstore Map
+                Find Bookstores Near You
               </h2>
               <div className="text-sm text-gray-600">
                 Showing {filteredCount} of {totalCount} stores
@@ -100,7 +131,7 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
             <button
               onClick={toggleSearchCollapse}
               className="md:hidden bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label={isSearchCollapsed ? 'Show search filters' : 'Hide search filters'}
+              aria-label={isSearchCollapsed ? 'Show search' : 'Hide search'}
             >
               <svg 
                 className={`w-5 h-5 text-gray-600 transform transition-transform ${isSearchCollapsed ? 'rotate-180' : ''}`} 
@@ -113,13 +144,14 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
             </button>
           </div>
 
-          {/* Search and Filters - Collapsible */}
-          <div className={`transition-all duration-300 overflow-hidden ${isSearchCollapsed ? 'max-h-0 pb-0' : 'max-h-96 pb-4'}`}>
-            <StoreSearch
-              onSearch={handleSearch}
-              onFilterChange={handleFilterChange}
-              stores={stores}
-            />
+          {/* Search Bar - Collapsible - Remove overflow-hidden to allow dropdown to show */}
+          <div className={`transition-all duration-300 ${isSearchCollapsed ? 'max-h-0 pb-0' : 'max-h-96 pb-4'}`}>
+            <div className="flex justify-center">
+              <StoreMapSearch
+                onSearch={handleSearch}
+                stores={stores}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -128,8 +160,6 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
       <div className="flex-1 relative">
         <StoreMap
           stores={filteredStores}
-          selectedStore={selectedStore}
-          onStoreSelect={handleStoreSelect}
           height="100%"
           className="w-full h-full"
         />
@@ -137,35 +167,36 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
         {/* Quick Stats Overlay */}
         <div className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded-lg shadow-md">
           <div className="flex items-center space-x-4">
-            <div className="text-sm">
-              <span className="font-semibold text-gray-900">{filteredCount}</span>
-              <span className="text-gray-600 ml-1">
-                store{filteredCount !== 1 ? 's' : ''} shown
-              </span>
-            </div>
-            {filteredCount !== totalCount && (
-              <div className="text-xs text-gray-500">
-                of {totalCount} total
+            {isFiltering ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span className="text-sm text-gray-600">Searching...</span>
               </div>
+            ) : (
+              <>
+                <div className="text-sm">
+                  <span className="font-semibold text-gray-900">{filteredCount}</span>
+                  <span className="text-gray-600 ml-1">
+                    store{filteredCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                {filteredCount !== totalCount && (
+                  <div className="text-xs text-gray-500">
+                    of {totalCount} total
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* Reset Filters Button - Show when filters are active */}
-        {(searchQuery || filters.province || filters.hasWebsite || filters.minRating > 0 || filters.maxDistance || filters.openWeekends) && (
+        {/* Clear Search Button - Show when search is active */}
+        {searchQuery && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
             <button
               onClick={() => {
                 setSearchQuery('');
-                const resetFilters: StoreFilters = {
-                  hasWebsite: false,
-                  minRating: 0,
-                  province: '',
-                  maxDistance: null,
-                  openWeekends: false,
-                };
-                setFilters(resetFilters);
-                updateFilteredStores('', resetFilters);
+                updateFilteredStores('');
               }}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
@@ -173,21 +204,12 @@ export default function StoreMapView({ stores }: StoreMapViewProps) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                <span className="text-sm font-medium">Clear Filters</span>
+                <span className="text-sm font-medium">Clear Search</span>
               </div>
             </button>
           </div>
         )}
       </div>
-
-      {/* Store Details Modal */}
-      {selectedStore && (
-        <StoreDetails
-          store={selectedStore}
-          isOpen={!!selectedStore}
-          onClose={handleCloseDetails}
-        />
-      )}
     </div>
   );
 } 

@@ -2,21 +2,35 @@
 import { parseBookstores } from '../lib/csv/parser';
 import { processBookstore } from '../lib/processors/bookstore';
 import type { ProcessedBookstore } from '../types/bookstore';
-import Layout from '../layouts/Layout.astro';
 import StoreMapView from '../components/stores/StoreMapView';
 import path from 'path';
 
 // Load and process bookstore data
 const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
 const { records } = await parseBookstores(csvPath);
-const processedStores: ProcessedBookstore[] = records.map(processBookstore);
+const stores: ProcessedBookstore[] = records.map(processBookstore);
+console.log(`Loaded ${stores.length} stores for main map`);
 ---
 
-<Layout title="Bookstore Map - Interactive Bookstore Locator">
-  <main class="h-screen">
-    <StoreMapView client:load stores={processedStores} />
-  </main>
-</Layout>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bookstore Map - Find Bookstores Near You</title>
+    
+    <!-- Load Leaflet CSS and JS from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="h-screen overflow-hidden">
+    <main class="h-full">
+      <StoreMapView client:only="react" stores={stores} />
+    </main>
+  </body>
+</html>
 
 <style>
   /* Ensure full height layout */

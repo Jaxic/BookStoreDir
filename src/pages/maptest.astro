@@ -1,0 +1,53 @@
+---
+import { parseBookstores } from '../lib/csv/parser';
+import { processBookstore } from '../lib/processors/bookstore';
+import type { ProcessedBookstore } from '../types/bookstore';
+import StoreMap from '../components/map/StoreMap';
+import path from 'path';
+
+// Load and process bookstore data
+const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
+const { records } = await parseBookstores(csvPath);
+const stores: ProcessedBookstore[] = records.map(processBookstore);
+console.log(`Loaded ${stores.length} stores for map testing`);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BookDir Map Test - Nearby Stores</title>
+    
+    <!-- Load Leaflet CSS and JS from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="h-screen bg-gray-50">
+    <div class="h-full flex flex-col">
+      <!-- Header -->
+      <header class="bg-blue-600 text-white p-4">
+        <div class="max-w-7xl mx-auto">
+          <h1 class="text-2xl font-bold">BookDir Interactive Map</h1>
+          <p class="text-blue-100 mt-1">Find bookstores within 50km of your location</p>
+          <p class="text-blue-200 text-sm mt-1">📍 Allow location access to see nearby stores | Total: {stores.length} stores</p>
+        </div>
+      </header>
+      
+      <!-- Map Container -->
+      <main class="flex-1">
+        <StoreMap 
+          client:only="react" 
+          stores={stores}
+          maxDistanceKm={50}
+          onStoreSelect={(store) => {
+            console.log('Selected store:', store.name);
+            alert(`Selected: ${store.name} in ${store.city}, ${store.province}`);
+          }}
+        />
+      </main>
+    </div>
+  </body>
+</html> 
