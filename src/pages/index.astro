@@ -3,6 +3,7 @@ import { parseBookstores } from '../lib/csv/parser';
 import { processBookstore } from '../lib/processors/bookstore';
 import type { ProcessedBookstore } from '../types/bookstore';
 import StoreMapFixed from '../components/map/StoreMapFixed';
+import Navigation from '../components/Navigation.astro';
 import path from 'path';
 
 // Load and process bookstore data
@@ -45,6 +46,9 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
     >
       Skip to main content
     </a>
+
+    <!-- Navigation -->
+    <Navigation currentPage="home" />
 
     <!-- Hero Section -->
     <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white" role="banner">

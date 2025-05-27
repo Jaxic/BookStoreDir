@@ -1,0 +1,191 @@
+---
+import { getBookstoreData } from '../utils/dataLoader';
+import { extractProvinces, createProvinceSlug } from '../utils/geographic';
+
+interface Props {
+  currentPage?: 'home' | 'stores' | 'map' | 'province' | 'city';
+  currentProvince?: string;
+  currentCity?: string;
+}
+
+const { currentPage = 'home', currentProvince, currentCity } = Astro.props;
+
+// Get province data for dropdown
+const bookstores = await getBookstoreData();
+const provinces = extractProvinces(bookstores);
+---
+
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" role="banner">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Left side - Logo and title -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center text-gray-900 hover:text-blue-600 transition-colors">
+          <div class="bg-blue-100 rounded-full p-2 mr-3">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-bold">BookDir</span>
+        </a>
+      </div>
+      
+      <!-- Center - Navigation links with Province Dropdown -->
+      <nav class="hidden md:flex items-center space-x-6" role="navigation">
+        <a 
+          href="/" 
+          class={`text-sm font-medium transition-colors ${currentPage === 'home' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+        >
+          Home
+        </a>
+        
+        <a 
+          href="/stores" 
+          class={`text-sm font-medium transition-colors ${currentPage === 'stores' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+        >
+          Browse Stores
+        </a>
+        
+        <!-- Province Dropdown -->
+        <div class="relative group">
+          <button 
+            class={`inline-flex items-center text-sm font-medium transition-colors ${currentPage === 'province' || currentPage === 'city' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            Browse by Location
+            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Dropdown Menu -->
+          <div class="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div class="py-2 max-h-96 overflow-y-auto">
+              <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                Browse by Province
+              </div>
+              {provinces.map((province) => (
+                <a
+                  href={`/${createProvinceSlug(province.name)}/`}
+                  class={`block px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors ${
+                    currentProvince === province.name ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                  }`}
+                >
+                  <div class="flex justify-between items-center">
+                    <span>{province.name}</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                      {province.totalStores}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <a 
+          href="/#map-section" 
+          class={`text-sm font-medium transition-colors ${currentPage === 'map' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+        >
+          Map View
+        </a>
+      </nav>
+      
+      <!-- Mobile menu button -->
+      <button 
+        class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        aria-label="Open main menu"
+        id="mobile-menu-button"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Mobile menu (hidden by default) -->
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
+        <a 
+          href="/" 
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${currentPage === 'home' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+        >
+          Home
+        </a>
+        
+        <a 
+          href="/stores" 
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${currentPage === 'stores' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+        >
+          Browse Stores
+        </a>
+        
+        <!-- Mobile Province List -->
+        <div class="px-3 py-2">
+          <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Browse by Province
+          </div>
+          <div class="space-y-1 max-h-48 overflow-y-auto">
+            {provinces.slice(0, 8).map((province) => (
+              <a
+                href={`/${createProvinceSlug(province.name)}/`}
+                class={`block px-2 py-1 text-sm rounded transition-colors ${
+                  currentProvince === province.name ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <div class="flex justify-between items-center">
+                  <span>{province.name}</span>
+                  <span class="text-xs text-gray-500">
+                    {province.totalStores}
+                  </span>
+                </div>
+              </a>
+            ))}
+            {provinces.length > 8 && (
+              <a 
+                href="/stores" 
+                class="block px-2 py-1 text-sm text-blue-600 hover:text-blue-700"
+              >
+                View all provinces →
+              </a>
+            )}
+          </div>
+        </div>
+        
+        <a 
+          href="/#map-section" 
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${currentPage === 'map' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+        >
+          Map View
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Ensure dropdown appears above other content */
+  .group:hover .absolute {
+    z-index: 50;
+  }
+  
+  /* Smooth transitions for dropdown */
+  .group .absolute {
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  }
+</style> 
