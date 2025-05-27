@@ -4,7 +4,6 @@ import type { ProcessedBookstore } from '../../types/bookstore';
 import StoreSearch, { type StoreFilters } from './StoreSearch';
 import StoreList from './StoreList';
 import StoreDetails from './StoreDetails';
-import { isStoreOpen } from '../../utils/storeHours';
 import { searchStores, initializeSearch } from '../../lib/search';
 
 interface StoreDiscoveryProps {
@@ -15,13 +14,10 @@ export default function StoreDiscovery({ stores }: StoreDiscoveryProps) {
   const [filteredStores, setFilteredStores] = useState<ProcessedBookstore[]>(stores);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<StoreFilters>({
-    openNow: false,
     hasWebsite: false,
     minRating: 0,
     province: '',
-    priceLevel: '',
     maxDistance: null,
-    openLate: false,
     openWeekends: false,
   });
   const [selectedStore, setSelectedStore] = useState<ProcessedBookstore | null>(null);

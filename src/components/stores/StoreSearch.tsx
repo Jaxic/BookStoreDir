@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getSearchSuggestions } from '../../lib/search';
 import type { ProcessedBookstore } from '../../types/bookstore';
 
@@ -11,13 +11,10 @@ interface StoreSearchProps {
 }
 
 export interface StoreFilters {
-  openNow: boolean;
   hasWebsite: boolean;
   minRating: number;
   province: string;
-  priceLevel: string;
   maxDistance: number | null;
-  openLate: boolean;
   openWeekends: boolean;
 }
 
@@ -37,12 +34,7 @@ const PROVINCES = [
   'Yukon'
 ];
 
-const PRICE_LEVELS = [
-  { value: '', label: 'Any Price' },
-  { value: '$', label: 'Budget ($)' },
-  { value: '$$', label: 'Moderate ($$)' },
-  { value: '$$$', label: 'Expensive ($$$)' }
-];
+
 
 export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,17 +42,35 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [filters, setFilters] = useState<StoreFilters>({
-    openNow: false,
     hasWebsite: false,
     minRating: 0,
     province: '',
-    priceLevel: '',
     maxDistance: null,
-    openLate: false,
     openWeekends: false
   });
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced search function
+  const debouncedSearch = useCallback((query: string) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    debounceTimeoutRef.current = setTimeout(() => {
+      onSearch(query);
+    }, 300); // 300ms delay
+  }, [onSearch]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (searchQuery) {
@@ -71,22 +81,34 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
     }
   }, [searchQuery, stores]);
 
+  // Optimize filter change callback with useCallback
+  const optimizedFilterChange = useCallback((newFilters: StoreFilters) => {
+    onFilterChange(newFilters);
+  }, [onFilterChange]);
+
   useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
+    optimizedFilterChange(filters);
+  }, [filters, optimizedFilterChange]);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     setShowSuggestions(true);
     setActiveSuggestionIndex(-1);
-    onSearch(value);
+    
+    // Use debounced search for performance
+    debouncedSearch(value);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
     setActiveSuggestionIndex(-1);
+    
+    // Clear any pending debounced search and trigger immediate search
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
     onSearch(suggestion);
     searchInputRef.current?.focus();
   };
@@ -111,6 +133,12 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
         e.preventDefault();
         if (activeSuggestionIndex >= 0) {
           handleSuggestionClick(suggestions[activeSuggestionIndex]);
+        } else {
+          // If no suggestion is selected, trigger immediate search
+          if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+          }
+          onSearch(searchQuery);
         }
         break;
       case 'Escape':
@@ -120,9 +148,10 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
     }
   };
 
-  const handleFilterChange = (key: keyof StoreFilters, value: any) => {
+  // Optimize filter change handler with useCallback
+  const handleFilterChange = useCallback((key: keyof StoreFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -208,16 +237,7 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
         {/* Basic Filters */}
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Quick Filters</h3>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="openNow"
-              checked={filters.openNow}
-              onChange={e => handleFilterChange('openNow', e.target.checked)}
-              className="rounded text-blue-600 focus:ring-2 focus:ring-blue-500"
-            />
-            <label htmlFor="openNow" className="text-sm text-gray-700">Open Now</label>
-          </div>
+
           
           <div className="flex items-center space-x-2">
             <input
@@ -230,16 +250,7 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
             <label htmlFor="hasWebsite" className="text-sm text-gray-700">Has Website</label>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="openLate"
-              checked={filters.openLate}
-              onChange={e => handleFilterChange('openLate', e.target.checked)}
-              className="rounded text-blue-600 focus:ring-2 focus:ring-blue-500"
-            />
-            <label htmlFor="openLate" className="text-sm text-gray-700">Open Late (after 8 PM)</label>
-          </div>
+
 
           <div className="flex items-center space-x-2">
             <input
@@ -273,23 +284,7 @@ export default function StoreSearch({ onSearch, onFilterChange, stores }: StoreS
             </select>
           </div>
 
-          <div>
-            <label htmlFor="priceLevel" className="block text-sm font-medium text-gray-700">
-              Price Level
-            </label>
-            <select
-              id="priceLevel"
-              value={filters.priceLevel}
-              onChange={e => handleFilterChange('priceLevel', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-2"
-            >
-              {PRICE_LEVELS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+
         </div>
 
         {/* Location Filters */}

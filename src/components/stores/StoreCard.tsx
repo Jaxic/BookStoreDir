@@ -1,7 +1,6 @@
 /** @jsxImportSource react */
-import { useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent, memo, useMemo } from 'react';
 import type { ProcessedBookstore } from '../../types/bookstore';
-import { isStoreOpen } from '../../utils/storeHours';
 import { getImageFallbacks } from '../../utils/images';
 
 interface StoreCardProps {
@@ -9,12 +8,17 @@ interface StoreCardProps {
   onClick: () => void;
 }
 
-export default function StoreCard({ store, onClick }: StoreCardProps) {
+function StoreCard({ store, onClick }: StoreCardProps) {
   // Get image fallbacks using store name (prioritizes local store images)
-  const fallbackImages = getImageFallbacks(store.photos_url, store.name);
+  const fallbackImages = useMemo(() => 
+    getImageFallbacks(store.photos_url, store.name), 
+    [store.photos_url, store.name]
+  );
+  
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentImageSrc, setCurrentImageSrc] = useState(fallbackImages[0]);
-  const isOpen = isStoreOpen(store);
+  
+
 
   // Handle image loading error by trying next fallback
   const handleImageError = () => {
@@ -66,20 +70,7 @@ export default function StoreCard({ store, onClick }: StoreCardProps) {
           onError={handleImageError}
           loading="lazy"
         />
-        
-        {/* Status Badge */}
-        <div className="absolute top-3 right-3">
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              isOpen 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}
-            aria-label={isOpen ? 'Currently open' : 'Currently closed'}
-          >
-            {isOpen ? 'Open' : 'Closed'}
-          </span>
-        </div>
+
       </div>
 
       {/* Content Section */}
@@ -138,28 +129,41 @@ export default function StoreCard({ store, onClick }: StoreCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleLinkClick}
-              className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
               aria-label={`Visit ${store.name} website`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
+              <span className="text-xs">Website</span>
             </a>
           )}
           {store.phone && (
             <a
               href={`tel:${store.phone}`}
               onClick={handleLinkClick}
-              className="inline-flex items-center text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded"
+              className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded"
               aria-label={`Call ${store.name} at ${store.phone}`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
+              <span className="text-xs">Phone</span>
             </a>
           )}
         </div>
       </div>
     </button>
   );
-} 
+}
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(StoreCard, (prevProps, nextProps) => {
+  // Custom comparison function to optimize re-renders
+  return (
+    prevProps.store.place_id === nextProps.store.place_id &&
+    prevProps.store.name === nextProps.store.name &&
+    prevProps.store.status === nextProps.store.status &&
+    prevProps.onClick === nextProps.onClick
+  );
+}); 

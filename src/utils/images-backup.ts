@@ -38,7 +38,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Second Editions': 'Second_Editions.jpg',
   'Bouquinerie 4 Saisons': 'Bouquinerie_4_Saisons.jpg',
   'CAVITY Curiosity Shop': 'CAVITY_Curiosity_Shop.jpg',
-  'Bookends': 'Bookends.jpg',
+  'Bookends (original)': 'Bookends.jpg',
   'Juniper Books': 'Juniper_Books.jpg',
   'The Printed Word': 'The_Printed_Word.jpg',
   'The Scribe Bookstore': 'The_Scribe_Bookstore.jpg',
@@ -57,6 +57,8 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Book Lovers': 'Book_Lovers.jpg',
   'Forest Books & Media': 'Forest_Books_Media.jpg',
   'Bookcase The': 'Bookcase_The.jpg',
+  
+  // Additional mappings based on actual image files in StoreImages directory
   'TimelessLegacy': 'TimelessLegacy.jpg',
   'Susan\'s moving sale': 'Susans_moving_sale.jpg',
   'Rising Trout Sporting Books': 'Rising_Trout_Sporting_Books.jpg',
@@ -70,7 +72,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'David\'s New and Used Books': 'Davids_New_and_Used_Books.jpg',
   'Caron Canadiana': 'Caron_Canadiana.jpg',
   'Bound by Emmy': 'Bound_by_Emmy.jpg',
-  'Boîte à livres (1)': 'Boîte_à_livres_1.jpg',
+  'Boîte à livres 1': 'Boîte_à_livres_1.jpg',
   'Best Balance Planner': 'Best_Balance_Planner.jpg',
   'Ainsworth Books': 'Ainsworth_Books.jpg',
   'Friends of the Library Bookstore': 'Friends_of_the_Library_Bookstore_1.jpg',
@@ -80,7 +82,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Chapter 2 Used Books': 'Chapter_2_Used_Books.jpg',
   'BOOKEnds South': 'BOOKEnds_South.jpg',
   'MaVieOptimisee.com': 'MaVieOptimisee.com.jpg',
-  'Boîte à livres (2)': 'Boite_à_livres.jpg',
+  'Boite à livres': 'Boite_à_livres.jpg',
   'Precision Outdoor Power Books': 'Precision_Outdoor_Power_Books.jpg',
   'Theatre of the Mind Books': 'Theatre_of_the_Mind_Books.jpg',
   'Outsider Enterprises': 'Outsider_Enterprises.jpg',
@@ -100,7 +102,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Auger Roger Libraire Enr': 'Auger_Roger_Libraire_Enr.jpg',
   'Library Center of Don Renaissance Pierrefonds': 'Library_Center_of_Don_Renaissance_Pierrefonds.jpg',
   'Bande Dessinerie Enr La': 'Bande_Dessinerie_Enr_La.jpg',
-  'Lire Et Relire (1)': 'Lire_Et_Relire_1.jpg',
+  'Lire Et Relire': 'Lire_Et_Relire_1.jpg',
   'The Bookman': 'The_Bookman.jpg',
   'Capricorn Books': 'Capricorn_Books.jpg',
   'Amy\'s Used Books': 'Amys_Used_Books.jpg',
@@ -114,7 +116,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Renaissance Bookstore-Donation Centre': 'Renaissance_Bookstore-Donation_Centre.jpg',
   'Chapter and Verse': 'Chapter_and_Verse.jpg',
   'Phoenix Book Store': 'Phoenix_Book_Store.jpg',
-  'Lire et Relire (2)': 'Lire_et_Relire.jpg',
+  'Lire et Relire': 'Lire_et_Relire.jpg',
   'Mark Jokinen Books': 'Mark_Jokinen_Books.jpg',
   'Librairie l\'Échange': 'Librairie_lÉchange.jpg',
   'Librairie-en-Ligne': 'Librairie-en-Ligne.jpg',
@@ -137,7 +139,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'au Lieu du Livre': 'au_Lieu_du_Livre.jpg',
   'Book Bazaar': 'Book_Bazaar.jpg',
   'The Bookworm': 'The_Bookworm.jpg',
-  'Bookends (1)': 'Bookends_1.jpg',
+  'Bookends 1': 'Bookends_1.jpg',
   'Librairie Nelligan Inc': 'Librairie_Nelligan_Inc.jpg',
   'Renaissance Librairie Ontario': 'Renaissance_Librairie_Ontario.jpg',
   'Second Edition Used Book Store': 'Second_Edition_Used_Book_Store.jpg',
@@ -157,6 +159,8 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Legends Used Books': 'Legends_Used_Books.jpg',
   'Bookmart': 'Bookmart.jpg',
   'Librairie L\'Occasion': 'Librairie_LOccasion.jpg',
+  
+  // Additional mappings for stores that have image files
   'Alhambra Books': 'Alhambra_Books.jpg',
   'Antiquarius': 'Antiquarius.jpg',
   'Acadia Art & Rare Books - Est 1931': 'Acadia_Art_Rare_Books_-_Est_1931.jpg',
@@ -167,6 +171,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Atelier-Librairie Le Livre voyageur': 'Atelier-Librairie_Le_Livre_voyageur.jpg',
   'BackPages Books': 'BackPages_Books.jpg',
   'Bent Trees Books': 'Bent_Trees_Books.jpg',
+  'Bookends (Toronto)': 'Bookends.jpg',
   'Books & Things': 'Books_Things.jpg',
   'Books On The Grand': 'Books_On_The_Grand.jpg',
   'Borealis Books': 'Borealis_Books.jpg',
@@ -219,7 +224,7 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Wonder\'s Books': 'Wonders_Books.jpg',
   'Wee Book Inn': 'Wee_Book_Inn.jpg',
   
-  // Additional comprehensive mappings
+  // Comprehensive mappings for all stores with available images (Part 1)
   'Castaway Used Books (Nearly New Books)': 'Castaway_Used_Books_Nearly_New_Books.jpg',
   'Dartmouth Book Exchange': 'Dartmouth_Book_Exchange.jpg',
   'Companion Books': 'Companion_Books.jpg',
@@ -329,11 +334,11 @@ const STORE_IMAGE_MAP: Record<string, string> = {
   'Book box À Lire aux Pays des Merveilles': 'Book_box_À_Lire_aux_Pays_des_Merveilles.jpg',
   'Book Store': 'Book_Store.jpg',
   'Celine\'s Books and Beauty': 'Celines_Books_and_Beauty.jpg',
+  'David\'s New and Used Books': 'Davids_New_and_Used_Books.jpg',
+  'Dhear Black Gurl': 'Dhear_Black_Gurl.jpg',
   'Old Crow Antique & Book Shoppe Ltd.': 'Old_Crow_Antique_Book_Shoppe_Ltd.jpg',
-  'Tomes & Trivia': 'Tomes_Trivia.jpg',
-  
-  // Final comprehensive mappings for remaining stores
-  'Dhear Black Gurl': 'Dhear_Black_Gurl.jpg'
+  'Susan\'s moving sale': 'Susans_moving_sale.jpg',
+  'Tomes & Trivia': 'Tomes_Trivia.jpg'
 };
 
 /**

@@ -23,12 +23,20 @@ function parseTimeToMinutes(timeStr: string): number {
     throw new Error('Store is closed');
   }
 
-  // Handle just numbers (like "12" for noon)
+  // Handle just numbers (like "12" for noon) - improved logic
   if (/^\d{1,2}$/.test(cleanTimeStr)) {
     const hours = parseInt(cleanTimeStr);
-    if (hours >= 0 && hours <= 23) {
+    if (hours >= 1 && hours <= 12) {
+      // Assume PM for numbers 1-12 to be safe (most common case)
+      return hours === 12 ? 12 * 60 : (hours + 12) * 60;
+    } else if (hours >= 13 && hours <= 23) {
+      // 24-hour format
       return hours * 60;
+    } else if (hours === 0) {
+      // Midnight
+      return 0;
     }
+    // If hours is outside valid range, fall through to error
   }
 
   // Handle time formats like "10a.m." or "5:30p.m."
@@ -38,7 +46,7 @@ function parseTimeToMinutes(timeStr: string): number {
     const minutes = parseInt(timeMatch[2] || '0');
     const period = timeMatch[3].toLowerCase();
     
-    if (isNaN(hours) || isNaN(minutes)) {
+    if (isNaN(hours) || isNaN(minutes) || hours < 1 || hours > 12 || minutes >= 60) {
       throw new Error('Invalid time values');
     }
     
@@ -101,8 +109,17 @@ export function isStoreOpen(store: ProcessedBookstore): boolean {
       return true;
     }
 
-    // Parse hours range - handle different separators
-    const hoursParts = todayHours.split(/–|—|-/).map(t => t.trim());
+    // Parse hours range - handle different separators and strip day prefixes
+    let hoursOnly = todayHours;
+    
+    // Remove day prefixes like "Sunday: " or "Mon: "
+    const dayPrefixMatch = hoursOnly.match(/^[a-zA-Z]+day?:\s*(.+)$/i);
+    if (dayPrefixMatch) {
+      hoursOnly = dayPrefixMatch[1];
+    }
+    
+    // Handle different separators
+    const hoursParts = hoursOnly.split(/–|—|-/).map(t => t.trim());
     
     if (hoursParts.length !== 2) {
       console.warn(`Invalid hours format for store ${store.name}: ${todayHours}`);
@@ -121,6 +138,7 @@ export function isStoreOpen(store: ProcessedBookstore): boolean {
 
     return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
   } catch (error) {
+    console.error(`Error parsing hours for store ${store.name}:`, error);
     // Don't log every error, just return false for stores with unparseable hours
     return false;
   }
