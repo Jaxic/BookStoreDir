@@ -15,14 +15,35 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bookstore Directory</title>
-    <meta name="description" content="Discover local bookstores in your area" />
+    <title>Bookstore Directory - Discover Local Independent Bookstores</title>
+    <meta name="description" content="Find and discover independent bookstores in your area. Search by location, rating, and amenities. Support local businesses and find your next reading adventure." />
+    <meta name="keywords" content="bookstores, independent bookstores, local bookstores, books, reading, literature" />
+    
+    <!-- Accessibility and SEO meta tags -->
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bookstore Directory" />
+    <link rel="canonical" href="/" />
+    
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="Bookstore Directory - Discover Local Independent Bookstores" />
+    <meta property="og:description" content="Find and discover independent bookstores in your area. Support local businesses and find your next reading adventure." />
+    <meta property="og:type" content="website" />
+    
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="bg-gradient-to-b from-gray-50 to-white min-h-screen font-['Inter']">
-    <header class="bg-white border-b border-gray-200">
+    <!-- Skip to main content link -->
+    <a 
+      href="#main-content" 
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    >
+      Skip to main content
+    </a>
+
+    <header class="bg-white border-b border-gray-200" role="banner">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="text-center">
           <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
@@ -35,11 +56,11 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="main-content">
       <StoreDiscovery client:load stores={processedStores} />
-    </main>
+    </div>
 
-    <footer class="bg-white border-t border-gray-200 mt-auto">
+    <footer class="bg-white border-t border-gray-200 mt-auto" role="contentinfo">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="text-center">
           <p class="text-gray-500">

@@ -79,28 +79,51 @@ export default function StoreDiscovery({ stores }: StoreDiscoveryProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Screen reader heading */}
+      <h1 className="sr-only">Bookstore Discovery</h1>
+      
+      {/* Live region for search status announcements */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+        role="status"
+      >
+        {isSearching && "Searching bookstores..."}
+      </div>
+
       <StoreSearch 
         onSearch={handleSearch} 
         onFilterChange={handleFilterChange}
         stores={stores}
       />
+      
       <div className="mt-6">
         {isSearching ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div 
+            className="flex justify-center items-center py-8"
+            role="status"
+            aria-label="Loading search results"
+          >
+            <div 
+              className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"
+              aria-hidden="true"
+            ></div>
+            <span className="sr-only">Loading search results...</span>
           </div>
         ) : (
           <StoreList stores={filteredStores} onStoreClick={handleStoreClick} />
         )}
       </div>
+      
       {selectedStore && (
         <StoreDetails
           store={selectedStore}
-          isOpen={isStoreOpen(selectedStore)}
+          isOpen={!!selectedStore}
           onClose={handleCloseDetails}
         />
       )}
-    </div>
+    </main>
   );
 } 

@@ -56,6 +56,7 @@ export function processBookstore(data: BookstoreData): ProcessedBookstore {
   // Return processed data
   return {
     name: data.name,
+    description: data.description,
     address: data.address,
     city: data.city,
     province: data.province,

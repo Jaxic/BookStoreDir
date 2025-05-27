@@ -6,49 +6,111 @@ const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 
  * Parse time string in format "HH:MM" or "HH:MM AM/PM" to minutes since midnight
  */
 function parseTimeToMinutes(timeStr: string): number {
-  const [time, period] = timeStr.split(' ');
-  const [hours, minutes] = time.split(':').map(Number);
-  
-  let totalMinutes = hours * 60 + minutes;
-  
-  // Handle PM times
-  if (period?.toUpperCase() === 'PM' && hours !== 12) {
-    totalMinutes += 12 * 60;
+  // Add null check
+  if (!timeStr || typeof timeStr !== 'string') {
+    throw new Error('Invalid time string');
   }
-  // Handle 12 AM
-  if (period?.toUpperCase() === 'AM' && hours === 12) {
-    totalMinutes = minutes;
+
+  // Clean the time string
+  const cleanTimeStr = timeStr.trim();
+  
+  // Handle special cases
+  if (cleanTimeStr.toLowerCase().includes('24 hours') || cleanTimeStr.toLowerCase() === 'open 24 hours') {
+    return 0; // Return 0 for start of day (24 hour stores are always open)
   }
   
-  return totalMinutes;
+  if (cleanTimeStr.toLowerCase() === 'closed') {
+    throw new Error('Store is closed');
+  }
+
+  // Handle just numbers (like "12" for noon)
+  if (/^\d{1,2}$/.test(cleanTimeStr)) {
+    const hours = parseInt(cleanTimeStr);
+    if (hours >= 0 && hours <= 23) {
+      return hours * 60;
+    }
+  }
+
+  // Handle time formats like "10a.m." or "5:30p.m."
+  let timeMatch = cleanTimeStr.match(/(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?/i);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2] || '0');
+    const period = timeMatch[3].toLowerCase();
+    
+    if (isNaN(hours) || isNaN(minutes)) {
+      throw new Error('Invalid time values');
+    }
+    
+    let totalMinutes = hours * 60 + minutes;
+    
+    // Handle PM times
+    if (period === 'p' && hours !== 12) {
+      totalMinutes += 12 * 60;
+    }
+    // Handle 12 AM
+    if (period === 'a' && hours === 12) {
+      totalMinutes = minutes;
+    }
+    
+    return totalMinutes;
+  }
+
+  // Handle 24-hour format like "14:30"
+  timeMatch = cleanTimeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    
+    if (isNaN(hours) || isNaN(minutes) || hours >= 24 || minutes >= 60) {
+      throw new Error('Invalid time values');
+    }
+    
+    return hours * 60 + minutes;
+  }
+
+  // If no format matches, throw an error
+  throw new Error(`Unrecognized time format: ${cleanTimeStr}`);
 }
 
 /**
  * Check if the store is currently open based on its hours
  */
 export function isStoreOpen(store: ProcessedBookstore): boolean {
-  // If store is not operational, it's closed
-  if (store.status !== 'OPERATIONAL') {
-    return false;
-  }
-
-  // Get current day and time
-  const now = new Date();
-  const currentDay = DAYS[now.getDay()];
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  // Get today's hours
-  const todayHours = store.hours[currentDay];
-  
-  // If no hours listed for today, assume closed
-  if (!todayHours || todayHours.toLowerCase() === 'closed') {
-    return false;
-  }
-
-  // Parse hours range
-  const [openTime, closeTime] = todayHours.split('–').map(t => t.trim());
-  
   try {
+    // If store is not operational, it's closed
+    if (store.status !== 'OPERATIONAL') {
+      return false;
+    }
+
+    // Get current day and time
+    const now = new Date();
+    const currentDay = DAYS[now.getDay()];
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Get today's hours
+    const todayHours = store.hours[currentDay];
+    
+    // If no hours listed for today, assume closed
+    if (!todayHours || todayHours.toLowerCase() === 'closed') {
+      return false;
+    }
+
+    // Check for 24-hour operation
+    if (todayHours.toLowerCase().includes('open 24 hours') || todayHours.toLowerCase().includes('24 hours')) {
+      return true;
+    }
+
+    // Parse hours range - handle different separators
+    const hoursParts = todayHours.split(/–|—|-/).map(t => t.trim());
+    
+    if (hoursParts.length !== 2) {
+      console.warn(`Invalid hours format for store ${store.name}: ${todayHours}`);
+      return false;
+    }
+    
+    const [openTime, closeTime] = hoursParts;
+    
     const openMinutes = parseTimeToMinutes(openTime);
     const closeMinutes = parseTimeToMinutes(closeTime);
 
@@ -59,7 +121,7 @@ export function isStoreOpen(store: ProcessedBookstore): boolean {
 
     return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
   } catch (error) {
-    console.error(`Error parsing hours for store ${store.name}:`, error);
+    // Don't log every error, just return false for stores with unparseable hours
     return false;
   }
 }

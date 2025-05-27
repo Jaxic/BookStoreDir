@@ -11,6 +11,7 @@ export interface GoogleReview {
 export const BookstoreSchema = z.object({
   // Basic Info
   name: z.string(),
+  description: z.string().optional(),
   address: z.string(),
   city: z.string(),
   province: z.string(),
@@ -70,23 +71,57 @@ export const BookstoreSchema = z.object({
 // Export the type inferred from the schema
 export type BookstoreData = z.infer<typeof BookstoreSchema>;
 
-// Interface for processed bookstore data with additional fields
+// Interface for processed bookstore data with additional computed fields
 export interface ProcessedBookstore {
-  place_id: string;
+  // Basic Info
   name: string;
+  description?: string;
   address: string;
   city: string;
   province: string;
   zip: string;
-  latitude: number;
-  longitude: number;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  photos_url?: string;
-  hours?: {
-    [key: string]: string[];
+  phone: string;
+  website: string;
+  email: string;
+  
+  // Location data (raw strings from CSV)
+  lat: string;
+  lng: string;
+  formattedAddress: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
   };
-  price_level?: number;
-  types?: string[];
+  
+  // Rating data
+  ratingInfo?: {
+    rating: number;
+    numReviews: number;
+    reviews: GoogleReview[];
+  };
+  
+  // Hours data
+  hours: {
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
+  };
+  
+  // Photo URL
+  photos_url: string;
+  
+  // Status
+  status: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
+  
+  // Business Data
+  price_level?: string;
+  
+  // Google Integration
+  place_id: string;
+  place_url?: string;
+  street_view?: string;
 }
