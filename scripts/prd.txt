@@ -1,0 +1,218 @@
+Bookstore Directory Website - Product Requirements Document
+Project Overview
+Project Name: Bookstore Directory Website
+Technology Stack: Astro Static Site + TypeScript + Tailwind CSS
+Data Source: CSV file with 271 bookstores and 48 columns of Google Places data
+Hosting: Static hosting (Netlify/Vercel)
+Goals & Vision
+Primary Goal: Create a fast, SEO-optimized directory of 271 used/rare bookstores that helps users discover and connect with quality bookstores through comprehensive, trustworthy information.
+Success Metrics:
+
+Sub-second page load times across all 271+ pages
+High local SEO rankings for "bookstores near me" searches
+User engagement: store visits, phone calls, website clicks
+Easy CSV maintenance and updates
+
+User Stories
+Primary Users: Book lovers, collectors, tourists, and locals seeking bookstore experiences
+Core User Flows:
+
+User visits directory → searches by location → views results → clicks store for details → gets directions/calls/visits
+User browses by location (state → city → stores) → discovers stores in their area
+User explores stores through map interface → finds nearby options
+
+Key User Tasks:
+
+Find bookstores by location (current location, city, travel destination)
+Evaluate store quality through ratings, reviews, and photos
+Get practical visit information (hours, contact, directions)
+Discover stores in specific geographic areas
+Share bookstore discoveries with others
+
+Technical Requirements
+Data Structure (48 CSV Columns):
+
+Basic Info: status, name, site, category, description, phone, full_address
+Location: street, city, postal_code, state, latitude, longitude
+Business Data: rating, reviews, business_status, working_hours
+Daily Hours: mon_hours through sun_hours
+Google Reviews: 5 review objects (author, rating, time, text)
+Google Integration: location_link, place_id, photo, street_view
+
+Performance Requirements:
+
+Generate 271+ static pages at build time
+Search results under 100ms response time
+Mobile-first responsive design
+Core Web Vitals optimization
+Offline capability for viewed stores
+
+Features & Functionality
+MVP Features (Launch Requirements):
+1. CSV Data Processing System
+Purpose: Transform 48-column CSV into optimized static data
+
+Parse and validate all CSV columns with error handling
+Generate SEO-friendly slugs for stores, cities, categories
+Create search indexes for fast client-side filtering
+Process Google review timestamps into readable formats
+Handle missing data gracefully with sensible fallbacks
+Generate location hierarchies
+
+2. Store Discovery Interface
+Purpose: Comprehensive search and filtering for 271 stores
+
+Location-based search with autocomplete from CSV data
+Rating and review count filters
+"Open now" filtering using daily hours data
+Text search across store names and descriptions
+URL state management for shareable searches
+Mobile-optimized touch interactions
+
+3. Interactive Store Mapping
+Purpose: Visual discovery through maps
+
+Plot all stores using latitude/longitude coordinates
+Marker clustering for performance with 271 locations
+Store info popups with key details
+Real-time sync with search filters
+User location detection and "near me" features
+Mobile-optimized touch controls
+
+4. Store Detail Pages
+Purpose: Comprehensive store information (271 static pages)
+
+Complete store information from all 48 CSV columns
+Google reviews display with ratings and timestamps
+Formatted business hours with "open now" status
+Contact information with click-to-call and directions
+Local business structured data (JSON-LD) for SEO
+Integration with Google Maps and Street View
+
+5. Geographic Navigation
+Purpose: Location-based browsing
+
+State-level pages with store counts
+City-specific pages with local listings
+Breadcrumb navigation with location hierarchy
+SEO optimization for location-based searches
+Internal linking between geographic levels
+
+6. CSV Update and Management System
+Purpose: Seamless data maintenance
+
+Validate new CSV files against expected schema
+Create automatic backups before processing updates
+Generate detailed diff reports showing changes
+Implement rollback capability for problematic updates
+Automate build and deployment for approved updates
+Monitor data quality and flag potential issues
+
+Post-MVP Features:
+User Personalization System
+
+Recently viewed stores tracking
+Custom search preferences saving
+Personalized store recommendations
+
+Store Submission Portal
+
+Public form for suggesting new bookstores
+Store owner verification workflow
+Community-driven updates and corrections
+Moderation and approval system
+
+Enhanced Analytics Dashboard
+
+Store discovery pattern analysis
+Popular search terms and locations
+User engagement metrics
+CSV data quality monitoring
+
+User Experience Design
+Design Principles:
+
+Aesthetic: Warm, bookstore-inspired design with professional credibility
+Colors: Deep browns (#8B4513), cream backgrounds (#F5F5DC), forest green accents (#228B22)
+Typography: Serif headings for literary feel, clean sans-serif for readability
+Layout: Clean, scannable information hierarchy prioritizing store discovery
+Mobile: Touch-optimized with 44pt minimum targets, click-to-call/directions
+
+Key UX Flows:
+Homepage Experience:
+
+Hero section with location search and value proposition
+Interactive map preview showing store clusters
+Featured high-rated stores (4.5+ stars)
+Directory statistics and overview
+
+Search & Browse Experience:
+
+Real-time filtering with URL state preservation
+Toggle between list and map views
+Active filter display with easy removal
+Sort options: distance, rating, alphabetical
+"Open now" prominence for immediate visits
+
+Store Detail Experience:
+
+Hero image with store name and rating
+Tabbed interface: Overview, Reviews, Location
+Action buttons: Call, Directions, Website
+Complete business hours with current status
+All Google reviews with proper attribution
+
+Technical Architecture
+System Components:
+
+Data Layer: CSV processing and validation
+Static Generation: Astro build process for 271+ pages
+Search System: Client-side filtering with JSON indexes
+Map Integration: Coordinate-based store plotting with clustering
+Google Services: Maps, Places data, Street View integration
+Performance: CDN delivery, lazy loading, code splitting
+
+Build Process:
+
+CSV validation and parsing
+Data transformation and search index generation
+Static page generation (271 stores + location pages)
+Asset optimization and bundling
+Deployment to CDN with automated updates
+
+Update Workflow:
+
+New CSV validation against schema
+Backup creation and diff generation
+Staging environment preview
+Automated build and deployment
+Quality monitoring and rollback capability
+
+Success Criteria
+Performance Targets:
+
+Page load times under 2 seconds on 3G
+Search response times under 100ms
+95+ Google PageSpeed scores
+Mobile-first responsive design
+
+SEO Goals:
+
+Rank for local "bookstores near [city]" searches
+Generate 271+ indexed store pages
+Implement complete local business structured data
+Build authoritative internal linking structure
+
+User Engagement:
+
+High click-through rates to store contact info
+Significant mobile usage (travelers finding stores)
+Active use of location-based search and filtering
+Repeat visits for discovering new stores
+
+Maintenance Efficiency:
+
+Weekly CSV updates processed automatically
+Data quality monitoring with automated alerts
+Rollback capability for problematic updates
+Comprehensive update documentation
