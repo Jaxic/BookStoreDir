@@ -1,0 +1,57 @@
+---
+import { parseBookstores } from '../lib/csv/parser';
+import { processBookstore } from '../lib/processors/bookstore';
+import type { ProcessedBookstore } from '../types/bookstore';
+import Layout from '../layouts/Layout.astro';
+import StoreMapView from '../components/stores/StoreMapView';
+import path from 'path';
+
+// Load and process bookstore data
+const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
+const { records } = await parseBookstores(csvPath);
+const processedStores: ProcessedBookstore[] = records.map(processBookstore);
+---
+
+<Layout title="Bookstore Map - Interactive Bookstore Locator">
+  <main class="h-screen">
+    <StoreMapView client:load stores={processedStores} />
+  </main>
+</Layout>
+
+<style>
+  /* Ensure full height layout */
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Custom map styles */
+  :global(.leaflet-popup-content-wrapper) {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  :global(.leaflet-popup-tip) {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  :global(.bookstore-marker:hover) {
+    transform: scale(1.1);
+  }
+  
+  :global(.leaflet-control-zoom) {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  :global(.leaflet-control-zoom a) {
+    color: #374151;
+    font-weight: 600;
+  }
+  
+  :global(.leaflet-control-zoom a:hover) {
+    background-color: #f3f4f6;
+  }
+</style> 

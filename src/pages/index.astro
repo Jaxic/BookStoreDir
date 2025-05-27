@@ -49,9 +49,28 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
             Bookstore Directory
           </h1>
-          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
             Discover independent bookstores in your area. Support local businesses and find your next reading adventure.
           </p>
+          
+          {/* View Toggle */}
+          <div class="flex justify-center gap-4">
+            <span class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              List View
+            </span>
+            <a 
+              href="/map" 
+              class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              Map View
+            </a>
+          </div>
         </div>
       </div>
     </header>
