@@ -1,0 +1,110 @@
+import { parseBookstores } from '../lib/csv/parser';
+import { processBookstore } from '../lib/processors/bookstore';
+import type { ProcessedBookstore } from '../types/bookstore';
+import StoreMapGL from '../components/map/StoreMapGL';
+import path from 'path';
+
+// Load and process bookstore data
+const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
+const { records } = await parseBookstores(csvPath);
+const stores: ProcessedBookstore[] = records.map(processBookstore);
+console.log(`Loaded ${stores.length} stores for React Map GL testing`);
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>React Map GL Test - BookDir</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">React Map GL Test</h1>
+              <p class="text-sm text-gray-600">Testing the new React Map GL implementation</p>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-gray-500">
+                <span class="font-medium">{stores.length}</span> bookstores loaded
+              </div>
+              <div class="text-xs text-gray-400">
+                Using React Map GL + MapLibre
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Map Container -->
+      <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="p-4 border-b">
+            <h2 class="text-lg font-semibold text-gray-900">Interactive Store Map</h2>
+            <p class="text-sm text-gray-600">
+              Click on store markers to see details. Uses your location for distance calculations.
+            </p>
+          </div>
+          
+          <!-- Map -->
+          <div style="height: 600px;">
+            <StoreMapGL 
+              client:only="react" 
+              stores={stores}
+              height="100%"
+            />
+          </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-gray-900 mb-2">✅ Features Working</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• Interactive markers for all stores</li>
+              <li>• User location detection</li>
+              <li>• Distance calculations</li>
+              <li>• Popup information windows</li>
+              <li>• Map controls (zoom, pan)</li>
+            </ul>
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-gray-900 mb-2">🚀 Advantages</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• No CDN loading issues</li>
+              <li>• Perfect SSR compatibility</li>
+              <li>• Better performance</li>
+              <li>• Modern React patterns</li>
+              <li>• TypeScript support</li>
+            </ul>
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-gray-900 mb-2">🎯 Next Steps</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• Add marker clustering</li>
+              <li>• Implement search/filtering</li>
+              <li>• Add routing directions</li>
+              <li>• Custom map styling</li>
+              <li>• Mobile optimizations</li>
+            </ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html> 

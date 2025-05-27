@@ -29,13 +29,15 @@ export default function StoreMap({
 }: StoreMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const markerClusterGroupRef = useRef<any>(null);
   const userMarkerRef = useRef<any>(null);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [hasInitiallyFitted, setHasInitiallyFitted] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('Checking environment...');
 
   // Display all stores passed from parent (filtering is handled by StoreMapView)
   const filteredStores = useMemo(() => {
@@ -43,15 +45,148 @@ export default function StoreMap({
     return stores;
   }, [stores]);
 
-  // Clean up markers
+  // Clean up marker cluster group
   const clearMarkers = () => {
-    markersRef.current.forEach(marker => {
-      if (marker && marker.remove) {
-        marker.remove();
-      }
-    });
-    markersRef.current = [];
+    if (markerClusterGroupRef.current && mapInstanceRef.current) {
+      mapInstanceRef.current.removeLayer(markerClusterGroupRef.current);
+      markerClusterGroupRef.current.clearLayers();
+    }
   };
+
+  // Enhanced Leaflet loading with multiple fallback strategies
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setLoadingStatus('Server-side rendering...');
+      return;
+    }
+
+    let timeoutId: NodeJS.Timeout;
+    let attemptCount = 0;
+    const maxAttempts = 50; // 50 * 200ms = 10 seconds
+    
+    const loadLeaflet = async () => {
+      try {
+        console.log('🔄 Starting enhanced Leaflet loading process...');
+        setLoadingStatus('Checking for Leaflet scripts...');
+        
+        // Strategy 1: Check if scripts are already loaded
+        const checkScriptsLoaded = () => {
+          const leafletScript = document.querySelector('script[src*="leaflet.js"]');
+          const clusterScript = document.querySelector('script[src*="leaflet.markercluster"]');
+          const leafletCSS = document.querySelector('link[href*="leaflet.css"]');
+          
+          console.log('Script elements found:', {
+            leafletScript: !!leafletScript,
+            clusterScript: !!clusterScript,
+            leafletCSS: !!leafletCSS
+          });
+          
+          return leafletScript && clusterScript && leafletCSS;
+        };
+
+        // Strategy 2: Check global objects
+        const checkGlobalObjects = () => {
+          const L = (window as any).L;
+          if (!L) return false;
+          
+          const hasRequired = !!(L.Map && L.TileLayer && L.marker && L.markerClusterGroup);
+          console.log('Global L object check:', {
+            L: !!L,
+            version: L.version || 'unknown',
+            Map: !!L.Map,
+            TileLayer: !!L.TileLayer,
+            marker: !!L.marker,
+            markerClusterGroup: !!L.markerClusterGroup
+          });
+          
+          return hasRequired;
+        };
+
+        // Strategy 3: Wait with progressive checking
+        const waitForLeaflet = () => {
+          return new Promise<void>((resolve, reject) => {
+            const check = () => {
+              attemptCount++;
+              setLoadingStatus(`Loading attempt ${attemptCount}/${maxAttempts}...`);
+              
+              console.log(`🔍 Loading attempt ${attemptCount}/${maxAttempts}`);
+              
+              if (checkGlobalObjects()) {
+                console.log('✅ Leaflet libraries are ready!');
+                setLoadingStatus('Leaflet loaded successfully!');
+                resolve();
+                return;
+              }
+              
+              if (attemptCount >= maxAttempts) {
+                reject(new Error(`Failed to load Leaflet after ${maxAttempts} attempts`));
+                return;
+              }
+              
+              // Exponential backoff: start fast, slow down
+              const delay = attemptCount < 10 ? 100 : attemptCount < 30 ? 200 : 500;
+              setTimeout(check, delay);
+            };
+
+            // Start immediately
+            check();
+          });
+        };
+
+        // Strategy 4: If scripts aren't in DOM, wait for them to be added
+        if (!checkScriptsLoaded()) {
+          setLoadingStatus('Waiting for scripts to load...');
+          console.log('⚠️ Leaflet scripts not found in DOM, waiting...');
+          
+          // Watch for script additions
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+                    if (element.tagName === 'SCRIPT' && element.getAttribute('src')?.includes('leaflet')) {
+                      console.log('📜 Detected Leaflet script addition:', element.getAttribute('src'));
+                    }
+                  }
+                });
+              }
+            });
+          });
+          
+          observer.observe(document.head, { childList: true, subtree: true });
+          
+          // Clean up observer after timeout
+          timeoutId = setTimeout(() => observer.disconnect(), 15000);
+        }
+
+        await waitForLeaflet();
+        
+        if (timeoutId) clearTimeout(timeoutId);
+        console.log('🎉 Leaflet libraries successfully loaded!');
+        setLeafletLoaded(true);
+
+      } catch (error) {
+        console.error('❌ Failed to load Leaflet:', error);
+        setLoadingStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setLeafletLoaded(false);
+        
+        // Provide detailed debugging info
+        console.log('🔍 Debug information:');
+        console.log('- Window object:', typeof window);
+        console.log('- Document ready state:', document.readyState);
+        console.log('- Scripts in head:', document.head.querySelectorAll('script').length);
+        console.log('- Leaflet scripts:', document.querySelectorAll('script[src*="leaflet"]').length);
+        console.log('- Global L:', typeof (window as any).L);
+      }
+    };
+
+    loadLeaflet();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
 
   // Get user's location (always attempt to get location for distance calculations)
   useEffect(() => {
@@ -89,49 +224,68 @@ export default function StoreMap({
     );
   }, []); // Always try to get location
 
-  // Initialize map
+  // Initialize map when Leaflet is loaded
   useEffect(() => {
-    if (typeof window === 'undefined' || !mapRef.current) return;
+    if (!leafletLoaded || !mapRef.current || mapInstanceRef.current) {
+      return;
+    }
 
-    const initMap = () => {
-      const L = (window as any).L;
-      if (!L || mapInstanceRef.current) return;
+    const L = (window as any).L;
+    
+    try {
+      console.log('🗺️ Creating interactive store map with clustering...');
+      
+      // Create map with default center (will be updated when location is available)
+      const map = L.map(mapRef.current).setView([56.1304, -106.3468], 4);
 
-      try {
-        console.log('Creating interactive store map...');
-        
-        // Create map with default center (will be updated when location is available)
-        const map = new L.Map(mapRef.current).setView([56.1304, -106.3468], 4);
+      // Add tile layer
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
 
-        // Add tile layer
-        new L.TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+      // Create marker cluster group with custom options
+      const markers = L.markerClusterGroup({
+        // Custom cluster icon creation
+        iconCreateFunction: function(cluster: any) {
+          const childCount = cluster.getChildCount();
+          let clusterClass = 'marker-cluster-';
+          
+          // Different styles based on cluster size
+          if (childCount < 10) {
+            clusterClass += 'small';
+          } else if (childCount < 50) {
+            clusterClass += 'medium';
+          } else {
+            clusterClass += 'large';
+          }
 
-        mapInstanceRef.current = map;
-        setMapReady(true);
-        console.log('Store map created successfully!');
+          return L.divIcon({
+            html: `
+              <div class="cluster-inner">
+                <div class="cluster-icon">📚</div>
+                <div class="cluster-count">${childCount}</div>
+              </div>
+            `,
+            className: `marker-cluster ${clusterClass}`,
+            iconSize: L.point(40, 40)
+          });
+        },
+        // Cluster behavior options
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        maxClusterRadius: 50, // Maximum radius for clustering (in pixels)
+        disableClusteringAtZoom: 15 // Disable clustering at high zoom levels
+      });
 
-      } catch (error) {
-        console.error('Error creating store map:', error);
-      }
-    };
+      markerClusterGroupRef.current = markers;
+      mapInstanceRef.current = map;
+      setMapReady(true);
+      console.log('✅ Store map with clustering created successfully!');
 
-    // Check if Leaflet is available
-    if ((window as any).L) {
-      initMap();
-    } else {
-      // Poll for Leaflet availability
-      const checkInterval = setInterval(() => {
-        if ((window as any).L) {
-          clearInterval(checkInterval);
-          initMap();
-        }
-      }, 100);
-
-      // Cleanup interval after 5 seconds
-      setTimeout(() => clearInterval(checkInterval), 5000);
+    } catch (error) {
+      console.error('❌ Error creating store map:', error);
     }
 
     // Cleanup function
@@ -146,7 +300,7 @@ export default function StoreMap({
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [leafletLoaded]);
 
   // Add user location marker and fit map to show nearby stores (only once initially)
   useEffect(() => {
@@ -177,7 +331,7 @@ export default function StoreMap({
 
     try {
       // Create custom user location icon
-      const userIcon = new L.DivIcon({
+      const userIcon = L.divIcon({
         html: `
           <div class="user-marker">
             <div class="user-marker-inner">📍</div>
@@ -189,7 +343,7 @@ export default function StoreMap({
       });
 
       // Create user location marker using custom icon
-      const userMarker = new L.Marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+      const userMarker = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
         .addTo(mapInstanceRef.current)
         .bindPopup('📍 Your Location');
 
@@ -210,10 +364,10 @@ export default function StoreMap({
 
   }, [mapReady, userLocation, filteredStores, hasInitiallyFitted]);
 
-  // Add store markers when map is ready and stores change
+  // Add store markers to cluster group when map is ready and stores change
   useEffect(() => {
-    if (!mapReady || !mapInstanceRef.current) {
-      console.log('Skipping markers: mapReady=', mapReady, 'mapInstance=', !!mapInstanceRef.current);
+    if (!mapReady || !mapInstanceRef.current || !markerClusterGroupRef.current) {
+      console.log('Skipping markers: mapReady=', mapReady, 'mapInstance=', !!mapInstanceRef.current, 'clusterGroup=', !!markerClusterGroupRef.current);
       return;
     }
 
@@ -225,20 +379,20 @@ export default function StoreMap({
 
     // Use filtered stores
     const storesToDisplay = filteredStores;
-    console.log('=== MARKER UPDATE ===');
+    console.log('=== CLUSTERED MARKER UPDATE ===');
     console.log('Stores to display:', storesToDisplay.length);
     
-    // Always clear existing markers first
-    clearMarkers();
+    // Clear existing markers from cluster group
+    markerClusterGroupRef.current.clearLayers();
     
     if (!storesToDisplay.length) {
-      console.log('No stores to display - markers cleared');
+      console.log('No stores to display - cluster group cleared');
       return;
     }
 
-    console.log(`Adding ${storesToDisplay.length} store markers...`);
+    console.log(`Adding ${storesToDisplay.length} store markers to cluster group...`);
 
-    // Create all markers synchronously to prevent flashing
+    // Create all markers and add to cluster group
     let successfulMarkers = 0;
     const failedStores: string[] = [];
     
@@ -254,7 +408,7 @@ export default function StoreMap({
 
       try {
         // Create custom bookstore icon
-        const storeIcon = new L.DivIcon({
+        const storeIcon = L.divIcon({
           html: `
             <div class="store-marker">
               <div class="marker-pin">📚</div>
@@ -265,7 +419,7 @@ export default function StoreMap({
           iconAnchor: [15, 15]
         });
 
-        const marker = new L.Marker([lat, lng], { icon: storeIcon }).addTo(mapInstanceRef.current);
+        const marker = L.marker([lat, lng], { icon: storeIcon });
         
         // Enhanced popup content
         const distance = userLocation ? 
@@ -288,7 +442,8 @@ export default function StoreMap({
           maxWidth: 300
         });
         
-        markersRef.current.push(marker);
+        // Add marker to cluster group
+        markerClusterGroupRef.current.addLayer(marker);
         successfulMarkers++;
 
       } catch (error) {
@@ -297,14 +452,15 @@ export default function StoreMap({
       }
     });
     
-    console.log(`Successfully added ${successfulMarkers} markers out of ${storesToDisplay.length} stores`);
+    // Add cluster group to map
+    mapInstanceRef.current.addLayer(markerClusterGroupRef.current);
+    
+    console.log(`Successfully added ${successfulMarkers} markers to cluster group out of ${storesToDisplay.length} stores`);
     if (failedStores.length > 0) {
       console.warn(`Failed to create markers for ${failedStores.length} stores:`, failedStores);
     }
 
   }, [mapReady, filteredStores]);
-
-
 
   return (
     <div className={`relative ${className}`} style={{ height }}>
@@ -316,19 +472,24 @@ export default function StoreMap({
       />
       
       {/* Loading indicator */}
-      {(!mapReady || isLoadingLocation) && (
+      {(!leafletLoaded || !mapReady || isLoadingLocation) && (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-gray-600">
-              {!mapReady ? 'Loading map...' : 'Getting your location...'}
+            <p className="text-gray-600 font-medium">
+              {!leafletLoaded ? loadingStatus : !mapReady ? 'Initializing map...' : 'Getting your location...'}
             </p>
+            {!leafletLoaded && (
+              <p className="text-xs text-gray-500 mt-2 max-w-sm">
+                If this takes too long, try refreshing the page
+              </p>
+            )}
           </div>
         </div>
       )}
 
       {/* Location error message */}
-      {locationError && (
+      {locationError && mapReady && (
         <div className="absolute top-4 left-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-lg shadow-lg max-w-sm">
           <p className="text-sm">
             <strong>Location unavailable:</strong> {locationError}
@@ -340,8 +501,8 @@ export default function StoreMap({
       )}
 
       {/* Map controls */}
-      <div className="absolute top-4 right-4 z-10 space-y-2">
-        {userLocation && (
+      <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+        {userLocation && mapReady && (
           <button
             onClick={() => {
               if (mapInstanceRef.current && userLocation) {
@@ -354,43 +515,48 @@ export default function StoreMap({
           </button>
         )}
         
-        <button
-          onClick={() => {
-            if (mapInstanceRef.current) {
-              if (userLocation && filteredStores.length > 0) {
-                // Fit to filtered stores
-                const L = (window as any).L;
-                const bounds = new L.LatLngBounds();
-                bounds.extend([userLocation.lat, userLocation.lng]);
-                filteredStores.slice(0, 50).forEach(store => {
-                  const lat = parseFloat(store.lat);
-                  const lng = parseFloat(store.lng);
-                  if (!isNaN(lat) && !isNaN(lng)) {
-                    bounds.extend([lat, lng]);
-                  }
-                });
-                mapInstanceRef.current.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
-              } else {
-                // Fallback to Canada view
-                mapInstanceRef.current.setView([56.1304, -106.3468], 4);
+        {mapReady && (
+          <button
+            onClick={() => {
+              if (mapInstanceRef.current) {
+                if (userLocation && filteredStores.length > 0) {
+                  // Fit to filtered stores
+                  const L = (window as any).L;
+                  const bounds = L.latLngBounds();
+                  bounds.extend([userLocation.lat, userLocation.lng]);
+                  filteredStores.slice(0, 50).forEach(store => {
+                    const lat = parseFloat(store.lat);
+                    const lng = parseFloat(store.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                      bounds.extend([lat, lng]);
+                    }
+                  });
+                  mapInstanceRef.current.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
+                } else {
+                  // Fallback to Canada view
+                  mapInstanceRef.current.setView([56.1304, -106.3468], 4);
+                }
               }
-            }
-          }}
-          className="bg-white shadow-lg rounded px-3 py-2 text-sm hover:bg-gray-50 border"
-        >
-          Reset View
-        </button>
+            }}
+            className="bg-white shadow-lg rounded px-3 py-2 text-sm hover:bg-gray-50 border"
+          >
+            Reset View
+          </button>
+        )}
         
-        <div className="bg-white shadow-lg rounded px-3 py-2 text-sm border">
-          <div className="font-medium">{filteredStores.length} stores</div>
-          <div className="text-xs text-gray-500">
-            on map
+        {mapReady && (
+          <div className="bg-white shadow-lg rounded px-3 py-2 text-sm border">
+            <div className="font-medium">{filteredStores.length} stores</div>
+            <div className="text-xs text-gray-500">
+              on map
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Custom styles */}
       <style>{`
+        /* Individual store marker styles */
         .store-marker {
           width: 30px;
           height: 30px;
@@ -410,12 +576,11 @@ export default function StoreMap({
           box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
-
-        
         .marker-pin {
           font-size: 16px;
         }
 
+        /* User location marker styles */
         .user-marker {
           width: 24px;
           height: 24px;
@@ -432,7 +597,60 @@ export default function StoreMap({
           color: white;
           font-size: 12px;
         }
+
+        /* Cluster marker styles */
+        .marker-cluster {
+          background-clip: padding-box;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .marker-cluster-small {
+          background-color: rgba(59, 130, 246, 0.6);
+          border: 3px solid rgba(59, 130, 246, 0.8);
+        }
+
+        .marker-cluster-medium {
+          background-color: rgba(16, 185, 129, 0.6);
+          border: 3px solid rgba(16, 185, 129, 0.8);
+        }
+
+        .marker-cluster-large {
+          background-color: rgba(245, 158, 11, 0.6);
+          border: 3px solid rgba(245, 158, 11, 0.8);
+        }
+
+        .cluster-inner {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cluster-icon {
+          font-size: 14px;
+          line-height: 1;
+        }
+
+        .cluster-count {
+          font-size: 11px;
+          line-height: 1;
+          margin-top: 1px;
+        }
+
+        /* Cluster hover effects */
+        .marker-cluster:hover {
+          transform: scale(1.1);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
         
+        /* Popup styles */
         .store-popup {
           font-family: system-ui, -apple-system, sans-serif;
         }
