@@ -13,7 +13,7 @@ export const BookstoreSchema = z.object({
   name: z.string(),
   address: z.string(),
   city: z.string(),
-  state: z.string(),
+  province: z.string(),
   zip: z.string(),
   phone: z.string().optional(),
   website: z.string().optional(),
@@ -71,44 +71,22 @@ export const BookstoreSchema = z.object({
 export type BookstoreData = z.infer<typeof BookstoreSchema>;
 
 // Interface for processed bookstore data with additional fields
-export interface ProcessedBookstore extends Partial<BookstoreData> {
-  // Basic Info
+export interface ProcessedBookstore {
+  place_id: string;
   name: string;
   address: string;
   city: string;
-  state: string;
+  province: string;
   zip: string;
-  phone: string;
-  website: string;
-  
-  // Location
-  lat: string;
-  lng: string;
-  formattedAddress: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
+  latitude: number;
+  longitude: number;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  photos_url?: string;
+  hours?: {
+    [key: string]: string[];
   };
-  
-  // Rating and Reviews
-  ratingInfo?: {
-    rating: number;
-    numReviews: number;
-    reviews: GoogleReview[];
-  };
-  
-  // Hours
-  hours: {
-    monday?: string;
-    tuesday?: string;
-    wednesday?: string;
-    thursday?: string;
-    friday?: string;
-    saturday?: string;
-    sunday?: string;
-  };
-
-  // Photos and Status
-  photos_url: string;
-  status?: 'OPERATIONAL' | 'CLOSED' | 'TEMPORARILY_CLOSED';
+  price_level?: number;
+  types?: string[];
 }

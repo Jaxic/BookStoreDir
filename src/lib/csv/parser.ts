@@ -19,7 +19,7 @@ function mapCsvToSchema(row: any): Partial<BookstoreData> {
     name: row.name,
     address: row.street,
     city: row.city,
-    state: row.state,
+    province: row.state,
     zip: row.postal_code,
     phone: row.phone,
     website: row.site,

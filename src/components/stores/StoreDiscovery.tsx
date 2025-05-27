@@ -5,6 +5,7 @@ import StoreSearch, { type StoreFilters } from './StoreSearch';
 import StoreList from './StoreList';
 import StoreDetails from './StoreDetails';
 import { isStoreOpen } from '../../utils/storeHours';
+import { searchStores, initializeSearch } from '../../lib/search';
 
 interface StoreDiscoveryProps {
   stores: ProcessedBookstore[];
@@ -17,38 +18,48 @@ export default function StoreDiscovery({ stores }: StoreDiscoveryProps) {
     openNow: false,
     hasWebsite: false,
     minRating: 0,
+    province: '',
+    priceLevel: '',
+    maxDistance: null,
+    openLate: false,
+    openWeekends: false,
   });
   const [selectedStore, setSelectedStore] = useState<ProcessedBookstore | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
+  // Initialize search when component mounts
   useEffect(() => {
-    let result = [...stores];
+    initializeSearch(stores);
+  }, [stores]);
 
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(store => 
-        store.name?.toLowerCase().includes(query) ||
-        store.formattedAddress?.toLowerCase().includes(query) || false
-      );
-    }
+  // Update filtered stores when search query or filters change
+  useEffect(() => {
+    let isMounted = true;
 
-    // Apply filters
-    if (filters.openNow) {
-      result = result.filter(store => isStoreOpen(store));
-    }
+    const updateSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchStores(stores, searchQuery, filters);
+        if (isMounted) {
+          setFilteredStores(results);
+        }
+      } catch (error) {
+        console.error('Error searching stores:', error);
+        if (isMounted) {
+          setFilteredStores(stores); // Fallback to all stores on error
+        }
+      } finally {
+        if (isMounted) {
+          setIsSearching(false);
+        }
+      }
+    };
 
-    if (filters.hasWebsite) {
-      result = result.filter(store => !!store.website);
-    }
+    updateSearch();
 
-    if (filters.minRating > 0) {
-      result = result.filter(store => 
-        store.ratingInfo && 
-        store.ratingInfo.rating >= filters.minRating
-      );
-    }
-
-    setFilteredStores(result);
+    return () => {
+      isMounted = false;
+    };
   }, [stores, searchQuery, filters]);
 
   const handleSearch = (query: string) => {
@@ -63,32 +74,31 @@ export default function StoreDiscovery({ stores }: StoreDiscoveryProps) {
     setSelectedStore(store);
   };
 
+  const handleCloseDetails = () => {
+    setSelectedStore(null);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar with search and filters */}
-        <div className="lg:col-span-1">
-          <StoreSearch 
-            onSearch={handleSearch}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
-
-        {/* Main content area */}
-        <div className="lg:col-span-3">
-          <StoreList 
-            stores={filteredStores}
-            onStoreClick={handleStoreClick}
-          />
-        </div>
+      <StoreSearch 
+        onSearch={handleSearch} 
+        onFilterChange={handleFilterChange}
+        stores={stores}
+      />
+      <div className="mt-6">
+        {isSearching ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <StoreList stores={filteredStores} onStoreClick={handleStoreClick} />
+        )}
       </div>
-
-      {/* Store details modal */}
       {selectedStore && (
         <StoreDetails
           store={selectedStore}
-          isOpen={true}
-          onClose={() => setSelectedStore(null)}
+          isOpen={isStoreOpen(selectedStore)}
+          onClose={handleCloseDetails}
         />
       )}
     </div>

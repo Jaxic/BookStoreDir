@@ -46,7 +46,7 @@ export function processBookstore(data: BookstoreData): ProcessedBookstore {
   }
   
   // Create formatted fields
-  const formattedAddress = `${data.address}, ${data.city}, ${data.state} ${data.zip}`;
+  const formattedAddress = `${data.address}, ${data.city}, ${data.province} ${data.zip}`;
   
   // Process photo URL - ensure it's a valid URL or use a default
   const photoUrl = data.photos_url && data.photos_url.trim() !== '' 
@@ -58,10 +58,11 @@ export function processBookstore(data: BookstoreData): ProcessedBookstore {
     name: data.name,
     address: data.address,
     city: data.city,
-    state: data.state,
+    province: data.province,
     zip: data.zip,
     phone: data.phone || '',
     website: data.website || '',
+    email: data.email || '',
     
     // Location data
     lat: data.lat,
@@ -95,6 +96,14 @@ export function processBookstore(data: BookstoreData): ProcessedBookstore {
     photos_url: photoUrl,
     
     // Status
-    status: (data.status as ProcessedBookstore['status']) || 'OPERATIONAL'
+    status: (data.status as ProcessedBookstore['status']) || 'OPERATIONAL',
+    
+    // Business Data
+    price_level: data.price_level,
+    
+    // Google Integration
+    place_id: data.place_id,
+    place_url: data.place_url,
+    street_view: data.street_view,
   };
 } 
