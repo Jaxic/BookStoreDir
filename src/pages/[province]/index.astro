@@ -1,0 +1,281 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import StaticStoreCard from '../../components/StaticStoreCard.astro';
+import { getBookstoreData } from '../../utils/dataLoader';
+import { 
+  extractProvinces, 
+  getStoresByProvince, 
+  findProvinceBySlug, 
+  createProvinceSlug,
+  type ProvinceInfo,
+  type CityInfo
+} from '../../utils/geographic';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const bookstores = await getBookstoreData();
+  const provinces = extractProvinces(bookstores);
+
+  return provinces.map((province: ProvinceInfo) => ({
+    params: { 
+      province: createProvinceSlug(province.name)
+    },
+    props: { 
+      province,
+      bookstores: getStoresByProvince(bookstores, province.name)
+    }
+  }));
+};
+
+interface Props {
+  province: ProvinceInfo;
+  bookstores: any[];
+}
+
+const { province, bookstores } = Astro.props;
+const { params } = Astro;
+
+// Meta information
+const pageTitle = `Bookstores in ${province.name} - BookDir Canada`;
+const pageDescription = `Discover ${province.totalStores} used and rare bookstores across ${province.cities.length} cities in ${province.name}. Find local book treasures near you.`;
+const canonicalUrl = `${Astro.site}${params.province}/`;
+
+// Sort cities by store count for better display
+const topCities = province.cities.slice(0, 10);
+const otherCities = province.cities.slice(10);
+---
+
+<Layout 
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonicalUrl}
+>
+  <!-- Structured Data for Province -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `Bookstores in ${province.name}`,
+    "description": pageDescription,
+    "url": canonicalUrl,
+    "about": {
+      "@type": "Place",
+      "name": province.name,
+      "addressRegion": province.code
+    },
+    "numberOfItems": province.totalStores,
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": province.totalStores,
+      "itemListElement": bookstores.slice(0, 5).map((store, index) => ({
+        "@type": "LocalBusiness",
+        "position": index + 1,
+        "name": store.name,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": store.address,
+          "addressLocality": store.city,
+          "addressRegion": store.province,
+          "postalCode": store.zip
+        }
+      }))
+    }
+  })} />
+
+  <!-- Breadcrumb Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": Astro.site
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Browse Stores",
+        "item": `${Astro.site}stores/`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": province.name,
+        "item": canonicalUrl
+      }
+    ]
+  })} />
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb Navigation -->
+    <nav class="flex mb-6 text-sm text-gray-600" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-2">
+        <li><a href="/" class="hover:text-blue-600">Home</a></li>
+        <li class="flex items-center">
+          <span class="mx-2">/</span>
+          <a href="/stores/" class="hover:text-blue-600">Browse Stores</a>
+        </li>
+        <li class="flex items-center">
+          <span class="mx-2">/</span>
+          <span class="font-medium text-gray-900">{province.name}</span>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Province Header -->
+    <header class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-3xl font-bold text-gray-900">
+          Bookstores in {province.name}
+        </h1>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-blue-600">{province.totalStores}</div>
+          <div class="text-sm text-gray-600">Total Stores</div>
+        </div>
+      </div>
+      <p class="text-lg text-gray-600 max-w-3xl">
+        Explore {province.totalStores} unique used and rare bookstores across {province.cities.length} cities in {province.name}. 
+        From bustling urban centers to charming small towns, discover literary treasures waiting to be found.
+      </p>
+    </header>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-blue-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">Total Bookstores</h3>
+        <p class="text-3xl font-bold text-blue-600">{province.totalStores}</p>
+      </div>
+      <div class="bg-green-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-green-900 mb-2">Cities Covered</h3>
+        <p class="text-3xl font-bold text-green-600">{province.cities.length}</p>
+      </div>
+      <div class="bg-purple-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-purple-900 mb-2">Top City</h3>
+        <p class="text-xl font-bold text-purple-600">{topCities[0]?.name}</p>
+        <p class="text-sm text-purple-700">{topCities[0]?.storeCount} stores</p>
+      </div>
+    </div>
+
+    <!-- Browse by City -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Browse by City</h2>
+      
+      {topCities.length > 0 && (
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Major Cities</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topCities.map((city: CityInfo) => (
+              <a 
+                href={`/${params.province}/${city.slug}/`}
+                class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all duration-200"
+              >
+                <div class="flex justify-between items-center">
+                  <h4 class="text-lg font-medium text-gray-900">{city.name}</h4>
+                  <span class="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                    {city.storeCount} stores
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {otherCities.length > 0 && (
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Other Cities</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {otherCities.map((city: CityInfo) => (
+              <a 
+                href={`/${params.province}/${city.slug}/`}
+                class="block p-3 bg-gray-50 border border-gray-200 rounded hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+              >
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-900">{city.name}</span>
+                  <span class="text-xs text-gray-600">{city.storeCount}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+
+    <!-- Featured Stores -->
+    <section class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Featured Stores in {province.name}</h2>
+        <a 
+          href={`/map/?province=${encodeURIComponent(province.name)}`}
+          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          View on Map
+        </a>
+      </div>
+
+      {bookstores.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bookstores.slice(0, 9).map((store) => (
+            <StaticStoreCard store={store} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No stores found</h3>
+          <p class="text-gray-600">We don't have any bookstores listed for {province.name} yet.</p>
+        </div>
+      )}
+    </section>
+
+    {bookstores.length > 9 && (
+      <div class="text-center">
+        <a 
+          href="/stores/"
+          class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          View All {province.totalStores} Stores in {province.name}
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    )}
+
+    <!-- SEO Content -->
+    <section class="mt-16 prose prose-gray max-w-none">
+      <h2>Discover Bookstores in {province.name}</h2>
+      <p>
+        {province.name} is home to a vibrant community of {province.totalStores} independent bookstores 
+        spread across {province.cities.length} cities and towns. Whether you're searching for rare first editions, 
+        vintage paperbacks, or unique local publications, the bookstores of {province.name} offer an incredible 
+        diversity of literary treasures.
+      </p>
+      <p>
+        From the bustling book scenes in major cities like {topCities.slice(0, 3).map(city => city.name).join(', ')} 
+        to hidden gems in smaller communities, each bookstore in {province.name} has its own character and specialty. 
+        Many of these establishments have been serving book lovers for decades, building relationships with their 
+        communities and curating collections that reflect the unique culture and interests of their regions.
+      </p>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .prose h2 {
+    @apply text-xl font-bold text-gray-900 mt-8 mb-4;
+  }
+  
+  .prose p {
+    @apply text-gray-600 mb-4 leading-relaxed;
+  }
+</style> 
