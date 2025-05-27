@@ -1,0 +1,351 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run daily at 2 AM UTC to check for CSV data integrity
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Test and validation job
+  test:
+    name: Test & Validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript compilation check
+        run: npx tsc --noEmit
+
+      - name: Run linting
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Validate CSV data integrity
+        run: |
+          echo "🔍 Validating CSV data files..."
+          npm run validate:csv
+        continue-on-error: true
+
+      - name: Test CSV monitoring system
+        run: |
+          echo "🔧 Testing CSV monitoring system..."
+          npm run test:csv-monitoring
+        continue-on-error: true
+
+      - name: Generate test coverage report
+        run: npm run coverage
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+  # CSV data validation and backup job
+  csv-validation:
+    name: CSV Data Validation & Backup
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run comprehensive CSV validation
+        run: |
+          echo "🔍 Running comprehensive CSV validation pipeline..."
+          npm run validate:csv:comprehensive
+
+      - name: Create CSV backup
+        run: |
+          echo "💾 Creating CSV data backup..."
+          npm run backup:csv
+
+      - name: Generate CSV diff reports
+        run: |
+          echo "📊 Generating CSV diff reports..."
+          npm run diff:csv:reports
+        continue-on-error: true
+
+      - name: Upload CSV validation artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: csv-validation-reports
+          path: |
+            reports/
+            backups/
+            logs/
+          retention-days: 30
+
+  # Security scanning job
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run security scan with Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+        continue-on-error: true
+
+      - name: Scan for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+        continue-on-error: true
+
+  # Build and deployment preparation
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [test, csv-validation]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Generate static assets
+        run: |
+          echo "🏗️ Generating static assets from CSV data..."
+          npm run generate:static
+
+      - name: Optimize assets
+        run: |
+          echo "⚡ Optimizing assets..."
+          npm run optimize:assets
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            public/
+            .astro/
+          retention-days: 7
+
+  # Performance testing
+  performance:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Start application server
+        run: |
+          npm run preview &
+          sleep 10
+        continue-on-error: true
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+      - name: Run load testing
+        run: |
+          echo "🚀 Running load testing..."
+          npm run test:load
+        continue-on-error: true
+
+  # Deployment to staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security, performance]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.bookstore-app.com
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          # Add your staging deployment commands here
+          # Example: rsync, scp, or cloud provider CLI commands
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on staging..."
+          npm run test:smoke:staging
+        continue-on-error: true
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+
+  # Deployment to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, security, performance]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    environment:
+      name: production
+      url: https://bookstore-app.com
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          # Add your production deployment commands here
+          # Example: rsync, scp, or cloud provider CLI commands
+
+      - name: Run post-deployment health checks
+        run: |
+          echo "🏥 Running post-deployment health checks..."
+          npm run test:health:production
+
+      - name: Update CSV monitoring in production
+        run: |
+          echo "📊 Updating CSV monitoring configuration in production..."
+          npm run deploy:csv-monitoring
+
+      - name: Notify successful deployment
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          text: '🎉 Successfully deployed to production!'
+
+  # Cleanup job
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+      - name: Clean up old artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: |
+            build-artifacts
+            csv-validation-reports
+          failOnError: false
+
+      - name: Clean up old backups
+        run: |
+          echo "🧹 Cleaning up old backup files..."
+          # Add cleanup logic for old backups 

@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - next
+      - beta
+      - alpha
+      - '*.x'
+
+permissions:
+  contents: read # for checkout
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm clean-install
+
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Validate CSV data before release
+        run: |
+          echo "🔍 Validating CSV data integrity before release..."
+          npm run validate:csv:comprehensive
+
+      - name: Create release backup
+        run: |
+          echo "💾 Creating pre-release backup..."
+          npm run backup:csv:release
+
+      - name: Generate release notes with CSV changes
+        run: |
+          echo "📝 Generating release notes with CSV change summary..."
+          npm run generate:release-notes
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
+
+      - name: Post-release CSV monitoring update
+        run: |
+          echo "📊 Updating CSV monitoring configuration post-release..."
+          npm run update:csv-monitoring:post-release
+        continue-on-error: true
+
+      - name: Notify release completion
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#releases'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          text: |
+            🚀 New release published!
+            Version: ${{ env.RELEASE_VERSION }}
+            Branch: ${{ github.ref_name }}
+        if: success()
+
+  # Post-release validation
+  post-release-validation:
+    name: Post-Release Validation
+    runs-on: ubuntu-latest
+    needs: release
+    if: success()
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release artifacts
+        run: |
+          echo "✅ Validating release artifacts..."
+          npm run validate:release-artifacts
+
+      - name: Test CSV monitoring system post-release
+        run: |
+          echo "🔧 Testing CSV monitoring system after release..."
+          npm run test:csv-monitoring:post-release
+
+      - name: Generate post-release report
+        run: |
+          echo "📊 Generating post-release validation report..."
+          npm run generate:post-release-report
+
+      - name: Upload post-release artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: post-release-validation
+          path: |
+            reports/post-release/
+            logs/post-release/
+          retention-days: 30 

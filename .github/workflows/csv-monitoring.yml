@@ -1,0 +1,436 @@
+name: CSV Data Monitoring
+
+on:
+  push:
+    paths:
+      - 'data/**/*.csv'
+      - 'public/data/**/*.csv'
+      - 'src/data/**/*.csv'
+  pull_request:
+    paths:
+      - 'data/**/*.csv'
+      - 'public/data/**/*.csv'
+      - 'src/data/**/*.csv'
+  schedule:
+    # Run every 6 hours to monitor data integrity
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      validation_level:
+        description: 'Validation level'
+        required: true
+        default: 'comprehensive'
+        type: choice
+        options:
+          - basic
+          - comprehensive
+          - full
+      generate_reports:
+        description: 'Generate detailed reports'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Detect CSV changes
+  detect-changes:
+    name: Detect CSV Changes
+    runs-on: ubuntu-latest
+    outputs:
+      csv-changed: ${{ steps.changes.outputs.csv }}
+      changed-files: ${{ steps.changes.outputs.csv_files }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect CSV file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          list-files: 'csv'
+          filters: |
+            csv:
+              - 'data/**/*.csv'
+              - 'public/data/**/*.csv'
+              - 'src/data/**/*.csv'
+
+      - name: List changed CSV files
+        if: steps.changes.outputs.csv == 'true'
+        run: |
+          echo "Changed CSV files:"
+          echo "${{ steps.changes.outputs.csv_files }}"
+
+  # Validate CSV data
+  validate-csv:
+    name: Validate CSV Data
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.csv-changed == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    strategy:
+      matrix:
+        validation-type: [structure, content, business-rules]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run CSV structure validation
+        if: matrix.validation-type == 'structure'
+        run: |
+          echo "🔍 Running CSV structure validation..."
+          npm run validate:csv:structure
+        continue-on-error: true
+
+      - name: Run CSV content validation
+        if: matrix.validation-type == 'content'
+        run: |
+          echo "📊 Running CSV content validation..."
+          npm run validate:csv:content
+        continue-on-error: true
+
+      - name: Run business rules validation
+        if: matrix.validation-type == 'business-rules'
+        run: |
+          echo "📋 Running business rules validation..."
+          npm run validate:csv:business-rules
+        continue-on-error: true
+
+      - name: Upload validation results
+        uses: actions/upload-artifact@v3
+        with:
+          name: csv-validation-${{ matrix.validation-type }}
+          path: |
+            reports/validation/
+            logs/validation/
+          retention-days: 7
+
+  # Generate diff reports
+  generate-diff-reports:
+    name: Generate Diff Reports
+    runs-on: ubuntu-latest
+    needs: [detect-changes, validate-csv]
+    if: needs.detect-changes.outputs.csv-changed == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate comprehensive diff reports
+        run: |
+          echo "📊 Generating comprehensive CSV diff reports..."
+          npm run diff:csv:comprehensive
+
+      - name: Generate visual diff reports
+        run: |
+          echo "🎨 Generating visual diff reports..."
+          npm run diff:csv:visual
+        continue-on-error: true
+
+      - name: Generate summary report
+        run: |
+          echo "📋 Generating diff summary report..."
+          npm run diff:csv:summary
+
+      - name: Upload diff reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: csv-diff-reports
+          path: |
+            reports/diff/
+            reports/visual/
+          retention-days: 30
+
+      - name: Comment diff summary on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './reports/diff/summary.md';
+            
+            if (fs.existsSync(path)) {
+              const summary = fs.readFileSync(path, 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 📊 CSV Changes Summary\n\n${summary}`
+              });
+            }
+
+  # Create backups
+  create-backups:
+    name: Create Data Backups
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.csv-changed == 'true' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create incremental backup
+        run: |
+          echo "💾 Creating incremental CSV backup..."
+          npm run backup:csv:incremental
+
+      - name: Create full backup (scheduled only)
+        if: github.event_name == 'schedule'
+        run: |
+          echo "💾 Creating full CSV backup..."
+          npm run backup:csv:full
+
+      - name: Compress backups
+        run: |
+          echo "🗜️ Compressing backup files..."
+          npm run backup:csv:compress
+
+      - name: Upload backup artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: csv-backups-${{ github.run_number }}
+          path: |
+            backups/
+          retention-days: 90
+
+      - name: Clean old backups
+        run: |
+          echo "🧹 Cleaning old backup files..."
+          npm run backup:csv:cleanup
+
+  # Monitor data quality
+  monitor-quality:
+    name: Monitor Data Quality
+    runs-on: ubuntu-latest
+    needs: validate-csv
+    if: always()
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download validation results
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts/
+
+      - name: Analyze data quality metrics
+        run: |
+          echo "📈 Analyzing data quality metrics..."
+          npm run analyze:csv:quality
+
+      - name: Generate quality dashboard
+        run: |
+          echo "📊 Generating data quality dashboard..."
+          npm run generate:csv:dashboard
+
+      - name: Check quality thresholds
+        run: |
+          echo "⚠️ Checking data quality thresholds..."
+          npm run check:csv:thresholds
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: data-quality-reports
+          path: |
+            reports/quality/
+            dashboards/
+          retention-days: 30
+
+      - name: Create quality issue
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Data Quality Alert - ' + new Date().toISOString().split('T')[0],
+              body: `## Data Quality Alert
+              
+              A data quality issue has been detected in the CSV monitoring workflow.
+              
+              **Workflow Run:** ${{ github.run_id }}
+              **Trigger:** ${{ github.event_name }}
+              **Branch:** ${{ github.ref_name }}
+              
+              Please review the validation reports and take appropriate action.
+              
+              **Changed Files:**
+              ${{ needs.detect-changes.outputs.changed-files }}
+              `,
+              labels: ['data-quality', 'csv-monitoring', 'alert']
+            });
+
+  # Performance monitoring
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    needs: [validate-csv, generate-diff-reports]
+    if: always()
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Monitor CSV processing performance
+        run: |
+          echo "⚡ Monitoring CSV processing performance..."
+          npm run monitor:csv:performance
+
+      - name: Analyze memory usage
+        run: |
+          echo "💾 Analyzing memory usage patterns..."
+          npm run analyze:csv:memory
+
+      - name: Generate performance report
+        run: |
+          echo "📊 Generating performance report..."
+          npm run generate:csv:performance-report
+
+      - name: Upload performance data
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-monitoring
+          path: |
+            reports/performance/
+            metrics/
+          retention-days: 14
+
+  # Notification and reporting
+  notify-results:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [validate-csv, generate-diff-reports, create-backups, monitor-quality]
+    if: always()
+    
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          if [[ "${{ needs.validate-csv.result }}" == "failure" || "${{ needs.monitor-quality.result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=🚨" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.validate-csv.result }}" == "success" && "${{ needs.generate-diff-reports.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+          else
+            echo "status=warning" >> $GITHUB_OUTPUT
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "${{ steps.status.outputs.emoji }} CSV Monitoring Report",
+              "attachments": [
+                {
+                  "color": "${{ steps.status.outputs.status == 'success' && 'good' || steps.status.outputs.status == 'failure' && 'danger' || 'warning' }}",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Trigger",
+                      "value": "${{ github.event_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "${{ steps.status.outputs.status }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always() && secrets.SLACK_WEBHOOK
+
+      - name: Send email notification on failure
+        if: failure() && secrets.EMAIL_NOTIFICATION
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 CSV Monitoring Alert - ${{ github.repository }}"
+          body: |
+            CSV monitoring workflow has detected issues in repository ${{ github.repository }}.
+            
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Branch: ${{ github.ref_name }}
+            Trigger: ${{ github.event_name }}
+            
+            Please check the workflow logs for more details.
+          to: ${{ secrets.EMAIL_NOTIFICATION }} 
