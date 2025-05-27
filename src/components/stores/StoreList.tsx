@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import type { ProcessedBookstore } from '../../types/bookstore';
 import StoreCard from './StoreCard';
+import ErrorBoundary from '../ui/ErrorBoundary';
 
 interface StoreListProps {
   stores: ProcessedBookstore[];
@@ -78,17 +79,30 @@ export default function StoreList({ stores, onStoreClick }: StoreListProps) {
         </p>
       </div>
 
+      {/* Optimized Grid with consistent sizing and layout shift prevention */}
       <div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid gap-6 auto-rows-fr"
+        style={{
+          // Responsive grid with consistent column widths
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
+          // Ensure all rows have the same height
+          gridAutoRows: 'minmax(400px, auto)'
+        }}
         role="list"
         aria-label="Bookstore results"
       >
         {displayedStores.map((store) => (
-          <div key={store.place_id} role="listitem">
-            <StoreCard 
-              store={store} 
-              onClick={() => onStoreClick?.(store)}
-            />
+          <div 
+            key={store.place_id} 
+            role="listitem"
+            className="min-h-[400px] flex flex-col" // Ensure consistent minimum height
+          >
+            <ErrorBoundary>
+              <StoreCard 
+                store={store} 
+                onClick={() => onStoreClick?.(store)}
+              />
+            </ErrorBoundary>
           </div>
         ))}
       </div>
@@ -98,7 +112,7 @@ export default function StoreList({ stores, onStoreClick }: StoreListProps) {
         <div className="mt-8 text-center">
           <button
             onClick={handleLoadMore}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
             aria-label={`Load ${Math.min(LOAD_MORE_COUNT, storeCount - displayCount)} more bookstores`}
           >
             <svg 

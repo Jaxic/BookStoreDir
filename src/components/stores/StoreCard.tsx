@@ -2,6 +2,8 @@
 import { useState, type KeyboardEvent, memo, useMemo } from 'react';
 import type { ProcessedBookstore } from '../../types/bookstore';
 import { getImageFallbacks } from '../../utils/images';
+import { useLazyLoad } from '../../hooks/useLazyLoad';
+import ImageSkeleton from '../ui/ImageSkeleton';
 
 interface StoreCardProps {
   store: ProcessedBookstore;
@@ -18,7 +20,11 @@ function StoreCard({ store, onClick }: StoreCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentImageSrc, setCurrentImageSrc] = useState(fallbackImages[0]);
   
-
+  // Lazy loading hook
+  const { elementRef, isVisible, isLoaded, handleImageLoad, handleImageError: onImageError } = useLazyLoad<HTMLButtonElement>({
+    rootMargin: '200px 0px', // Start loading 200px before entering viewport
+    threshold: 0.1
+  });
 
   // Handle image loading error by trying next fallback
   const handleImageError = () => {
@@ -27,6 +33,7 @@ function StoreCard({ store, onClick }: StoreCardProps) {
       setCurrentImageIndex(nextIndex);
       setCurrentImageSrc(fallbackImages[nextIndex]);
     }
+    onImageError(); // Also call the lazy load error handler
   };
 
   const handleClick = () => {
@@ -56,73 +63,92 @@ function StoreCard({ store, onClick }: StoreCardProps) {
 
   return (
     <button
+      ref={elementRef}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="w-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:scale-[1.02] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className="w-full h-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:scale-[1.02] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex flex-col"
       aria-label={`View details for ${store.name}`}
     >
-      {/* Image Section */}
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={currentImageSrc}
-          alt={`${store.name} storefront`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={handleImageError}
-          loading="lazy"
-        />
-
+      {/* Image Section - Fixed height for consistency */}
+      <div className="relative h-48 overflow-hidden flex-shrink-0">
+        {!isVisible ? (
+          // Show skeleton while not in viewport
+          <ImageSkeleton className="w-full h-full" />
+        ) : !isLoaded ? (
+          // Show skeleton while image is loading
+          <>
+            <ImageSkeleton className="w-full h-full" />
+            <img
+              src={currentImageSrc}
+              alt={`${store.name} storefront`}
+              className="w-full h-full object-cover opacity-0 absolute inset-0"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+            />
+          </>
+        ) : (
+          // Show actual image when loaded
+          <img
+            src={currentImageSrc}
+            alt={`${store.name} storefront`}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={handleImageError}
+          />
+        )}
       </div>
 
-      {/* Content Section */}
-      <div className="p-4 text-left">
-        {/* Store Name */}
-        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {store.name}
-        </h3>
+      {/* Content Section - Flexible height to fill remaining space */}
+      <div className="p-4 text-left flex-1 flex flex-col justify-between">
+        <div className="flex-1">
+          {/* Store Name */}
+          <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+            {store.name}
+          </h3>
 
-        {/* Description */}
-        {store.description && (
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-            {store.description}
+          {/* Description */}
+          {store.description && (
+            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+              {store.description}
+            </p>
+          )}
+
+          {/* Location */}
+          <p className="text-sm text-gray-500 mb-2 line-clamp-1">
+            {store.city}, {store.province}
           </p>
-        )}
 
-        {/* Location */}
-        <p className="text-sm text-gray-500 mb-2 line-clamp-1">
-          {store.city}, {store.province}
-        </p>
-
-        {/* Rating */}
-        {store.ratingInfo && (
-          <div className="flex items-center gap-1 mb-3">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.floor(store.ratingInfo?.rating || 0)
-                      ? 'text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
+          {/* Rating */}
+          {store.ratingInfo && (
+            <div className="flex items-center gap-1 mb-3">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.floor(store.ratingInfo?.rating || 0)
+                        ? 'text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-sm text-gray-600">
+                {formatRating(store.ratingInfo)}
+              </span>
+              <span className="text-xs text-gray-500">
+                {formatNumReviews(store.ratingInfo)}
+              </span>
             </div>
-            <span className="text-sm text-gray-600">
-              {formatRating(store.ratingInfo)}
-            </span>
-            <span className="text-xs text-gray-500">
-              {formatNumReviews(store.ratingInfo)}
-            </span>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Contact Info */}
-        <div className="flex gap-3">
+        {/* Contact Info - Pinned to bottom */}
+        <div className="flex gap-3 mt-auto pt-2">
           {store.website && (
             <a
               href={store.website}
