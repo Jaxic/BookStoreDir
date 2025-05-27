@@ -1,0 +1,497 @@
+---
+import { parseBookstores } from '../../lib/csv/parser';
+import { processBookstore } from '../../lib/processors/bookstore';
+import { generateStoreSlug, createSlugMapping } from '../../utils/slugify';
+import { getStoreImageByName } from '../../utils/images';
+import type { ProcessedBookstore } from '../../types/bookstore';
+import path from 'path';
+
+export async function getStaticPaths() {
+  // Load and process bookstore data
+  const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
+  const { records } = await parseBookstores(csvPath);
+  const stores: ProcessedBookstore[] = records.map(processBookstore);
+
+  // Generate paths for all stores
+  const paths = stores.map(store => {
+    const slug = generateStoreSlug(store.name, store.city, store.province);
+    return {
+      params: { slug },
+      props: { store }
+    };
+  });
+
+  return paths;
+}
+
+const { store } = Astro.props;
+
+// Generate SEO-friendly meta data
+const pageTitle = `${store.name} - ${store.city}, ${store.province} | BookDir`;
+const pageDescription = store.description 
+  ? `${store.description.substring(0, 150)}...`
+  : `Visit ${store.name} in ${store.city}, ${store.province}. Find contact information, hours, reviews, and directions to this bookstore.`;
+
+// Get store image
+const storeImage = getStoreImageByName(store.name);
+
+// Format rating for display
+const rating = store.ratingInfo?.rating ? Number(store.ratingInfo.rating).toFixed(1) : null;
+const numReviews = store.ratingInfo?.numReviews || 0;
+
+// Format hours for display
+const formatHours = (hours: any) => {
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  
+  return days.map((day, index) => ({
+    day: dayNames[index],
+    hours: hours[day] || 'Closed'
+  }));
+};
+
+const formattedHours = formatHours(store.hours);
+
+// Generate structured data for SEO
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "BookStore",
+  "name": store.name,
+  "description": store.description || `Bookstore in ${store.city}, ${store.province}`,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": store.address,
+    "addressLocality": store.city,
+    "addressRegion": store.province,
+    "postalCode": store.zip,
+    "addressCountry": "CA"
+  },
+  "telephone": store.phone,
+  "url": store.website,
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": store.coordinates?.lat,
+    "longitude": store.coordinates?.lng
+  },
+  "aggregateRating": store.ratingInfo ? {
+    "@type": "AggregateRating",
+    "ratingValue": store.ratingInfo.rating,
+    "reviewCount": store.ratingInfo.numReviews
+  } : undefined,
+  "openingHours": formattedHours
+    .filter(h => h.hours !== 'Closed')
+    .map(h => `${h.day.substring(0, 2)} ${h.hours}`)
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="business.business" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={storeImage} />
+    <meta property="og:url" content={`https://bookdir.ca/stores/${Astro.params.slug}`} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={pageDescription} />
+    <meta property="twitter:image" content={storeImage} />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href={`https://bookdir.ca/stores/${Astro.params.slug}`} />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Styles -->
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+      }
+      
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      
+      .header {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      
+      .back-btn:hover {
+        background: #2563eb;
+      }
+      
+      .breadcrumb {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+      
+      .breadcrumb a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+      
+      .main {
+        padding: 2rem 0;
+      }
+      
+      .store-header {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .store-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+      }
+      
+      .store-location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
+      }
+      
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      
+      .stars {
+        color: #fbbf24;
+        font-size: 1.25rem;
+      }
+      
+      .rating-text {
+        color: #64748b;
+      }
+      
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+      
+      @media (max-width: 768px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .store-title {
+          font-size: 2rem;
+        }
+      }
+      
+      .main-content {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .info-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .info-card h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+      }
+      
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s;
+      }
+      
+      .contact-item:hover {
+        background: #f1f5f9;
+      }
+      
+      .contact-item a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      
+      .contact-item a:hover {
+        text-decoration: underline;
+      }
+      
+      .hours-grid {
+        display: grid;
+        gap: 0.5rem;
+      }
+      
+      .hours-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+      }
+      
+      .hours-row:nth-child(odd) {
+        background: #f8fafc;
+      }
+      
+      .day {
+        font-weight: 500;
+        color: #374151;
+      }
+      
+      .time {
+        color: #6b7280;
+      }
+      
+      .store-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .description {
+        color: #374151;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+      }
+      
+      .reviews-section {
+        margin-top: 2rem;
+      }
+      
+      .review {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      
+      .review-author {
+        font-weight: 500;
+        color: #1f2937;
+      }
+      
+      .review-rating {
+        color: #fbbf24;
+      }
+      
+      .review-text {
+        color: #4b5563;
+        line-height: 1.6;
+      }
+      
+      .map-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        margin-top: 1rem;
+      }
+      
+      .map-link:hover {
+        background: #059669;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <header class="header">
+      <div class="container">
+        <nav class="nav">
+          <a href="/" class="back-btn">
+            ← Back to Home
+          </a>
+          <div class="breadcrumb">
+            <a href="/">Home</a> / 
+            <a href="/stores">Browse Stores</a> / 
+            <span>{store.name}</span>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <div class="store-header">
+          <h1 class="store-title">{store.name}</h1>
+          <div class="store-location">
+            📍 {store.city}, {store.province}
+          </div>
+          {rating && (
+            <div class="rating">
+              <div class="stars">
+                {Array.from({ length: 5 }, (_, i) => 
+                  i < Math.floor(Number(rating)) ? '★' : '☆'
+                ).join('')}
+              </div>
+              <span class="rating-text">
+                {rating} ({numReviews} review{numReviews !== 1 ? 's' : ''})
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div class="content-grid">
+          <div class="main-content">
+            <img 
+              src={storeImage} 
+              alt={`${store.name} bookstore`}
+              class="store-image"
+              loading="lazy"
+            />
+            
+            {store.description && (
+              <div class="description">
+                <h2>About This Store</h2>
+                <p>{store.description}</p>
+              </div>
+            )}
+
+            {store.ratingInfo?.reviews && store.ratingInfo.reviews.length > 0 && (
+              <div class="reviews-section">
+                <h2>Customer Reviews</h2>
+                {store.ratingInfo.reviews.slice(0, 3).map((review, index) => (
+                  <div class="review" key={index}>
+                    <div class="review-header">
+                      <span class="review-author">{review.author}</span>
+                      <span class="review-rating">
+                        {Array.from({ length: 5 }, (_, i) => 
+                          i < review.rating ? '★' : '☆'
+                        ).join('')}
+                      </span>
+                    </div>
+                    <p class="review-text">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div class="sidebar">
+            <div class="info-card">
+              <h3>Contact Information</h3>
+              <div class="contact-item">
+                📍 <span>{store.formattedAddress}</span>
+              </div>
+              {store.phone && (
+                <div class="contact-item">
+                  📞 <a href={`tel:${store.phone}`}>{store.phone}</a>
+                </div>
+              )}
+              {store.website && (
+                <div class="contact-item">
+                  🌐 <a href={store.website} target="_blank" rel="noopener noreferrer">
+                    Visit Website
+                  </a>
+                </div>
+              )}
+              {store.email && (
+                <div class="contact-item">
+                  ✉️ <a href={`mailto:${store.email}`}>{store.email}</a>
+                </div>
+              )}
+              <a href={`/map?store=${encodeURIComponent(store.name)}`} class="map-link">
+                🗺️ View on Map
+              </a>
+            </div>
+
+            <div class="info-card">
+              <h3>Store Hours</h3>
+              <div class="hours-grid">
+                {formattedHours.map(({ day, hours }) => (
+                  <div class="hours-row" key={day}>
+                    <span class="day">{day}</span>
+                    <span class="time">{hours}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html> 
