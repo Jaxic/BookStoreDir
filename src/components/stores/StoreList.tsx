@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+import { useState, useMemo } from 'react';
 import type { ProcessedBookstore } from '../../types/bookstore';
 import StoreCard from './StoreCard';
 
@@ -7,8 +8,28 @@ interface StoreListProps {
   onStoreClick?: (store: ProcessedBookstore) => void;
 }
 
+const INITIAL_DISPLAY_COUNT = 12; // Show 12 stores initially (4 rows of 3)
+const LOAD_MORE_COUNT = 9; // Load 9 more stores each time (3 rows of 3)
+
 export default function StoreList({ stores, onStoreClick }: StoreListProps) {
+  const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
   const storeCount = stores.length;
+
+  // Memoize displayed stores to prevent unnecessary recalculations
+  const displayedStores = useMemo(() => {
+    return stores.slice(0, displayCount);
+  }, [stores, displayCount]);
+
+  const hasMoreStores = displayCount < storeCount;
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + LOAD_MORE_COUNT, storeCount));
+  };
+
+  // Reset display count when stores change (e.g., new search/filter)
+  useMemo(() => {
+    setDisplayCount(INITIAL_DISPLAY_COUNT);
+  }, [stores]);
 
   if (storeCount === 0) {
     return (
@@ -52,7 +73,7 @@ export default function StoreList({ stores, onStoreClick }: StoreListProps) {
         <p className="text-sm text-gray-600">
           {storeCount === 1 
             ? "Showing 1 bookstore" 
-            : `Showing ${storeCount} bookstores`
+            : `Showing ${displayedStores.length} of ${storeCount} bookstores`
           }
         </p>
       </div>
@@ -62,7 +83,7 @@ export default function StoreList({ stores, onStoreClick }: StoreListProps) {
         role="list"
         aria-label="Bookstore results"
       >
-        {stores.map((store) => (
+        {displayedStores.map((store) => (
           <div key={store.place_id} role="listitem">
             <StoreCard 
               store={store} 
@@ -71,6 +92,28 @@ export default function StoreList({ stores, onStoreClick }: StoreListProps) {
           </div>
         ))}
       </div>
+
+      {/* Load More Button */}
+      {hasMoreStores && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={handleLoadMore}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            aria-label={`Load ${Math.min(LOAD_MORE_COUNT, storeCount - displayCount)} more bookstores`}
+          >
+            <svg 
+              className="w-5 h-5 mr-2" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            Load More ({storeCount - displayCount} remaining)
+          </button>
+        </div>
+      )}
     </section>
   );
 } 
