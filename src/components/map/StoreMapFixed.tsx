@@ -8,7 +8,6 @@ interface StoreMapFixedProps {
   stores: ProcessedBookstore[];
   height?: string;
   className?: string;
-  targetStore?: ProcessedBookstore | null;
 }
 
 // Helper function to calculate distance between two points using Haversine formula
@@ -28,17 +27,18 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
 export default function StoreMapFixed({ 
   stores, 
   height = "100%",
-  className = "",
-  targetStore = null
+  className = ""
 }: StoreMapFixedProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<Map | null>(null);
-  const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const mapInstance = useRef<L.Map | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [targetStore, setTargetStore] = useState<ProcessedBookstore | null>(null);
+  const hasTargetStoreRef = useRef(false); // Track if we have or expect a target store
 
   // Detect mobile device
   useEffect(() => {
@@ -104,8 +104,8 @@ export default function StoreMapFixed({
       
       // Create map instance with mobile-optimized settings
       const map = new Map(mapContainer.current, {
-        center: userLocation ? [userLocation.latitude, userLocation.longitude] : [56.1304, -106.3468], // Canada center
-        zoom: userLocation ? 11 : 4,
+        center: [56.1304, -106.3468], // Canada center - don't use userLocation here to avoid re-initialization
+        zoom: 4,
         zoomControl: !isMobile, // Hide default zoom controls on mobile
         touchZoom: true,
         doubleClickZoom: true,
@@ -137,21 +137,13 @@ export default function StoreMapFixed({
         iconAnchor: [iconSize/2, iconSize/2]
       });
 
-      const userIcon = new DivIcon({
+      // Store the user icon for later use
+      (globalThis as any).userIcon = new DivIcon({
         className: 'user-location-icon',
         html: `<div style='background-color:#3b82f6;width:${userIconSize}px;height:${userIconSize}px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);animation:pulse 2s infinite;'></div>`,
         iconSize: [userIconSize, userIconSize],
         iconAnchor: [userIconSize/2, userIconSize/2]
       });
-
-      // Add user location marker if available
-      if (userLocation) {
-        const userMarker = new Marker([userLocation.latitude, userLocation.longitude], {
-          icon: userIcon
-        });
-        userMarker.addTo(map);
-        userMarker.bindPopup("📍 Your Location");
-      }
 
       // Add store markers
       validStores.forEach((store, index) => {
@@ -168,10 +160,7 @@ export default function StoreMapFixed({
           <p style="margin:4px 0;color:#666;font-size:${isMobile ? '15px' : '14px'};">${store.address}</p>
           <p style="margin:4px 0;color:#666;font-size:${isMobile ? '15px' : '14px'};">${store.city}, ${store.province}</p>`;
         
-        if (userLocation) {
-          const distance = calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng);
-          popupContent += `<p style="margin:4px 0;color:#2563eb;font-size:${isMobile ? '15px' : '14px'};font-weight:500;">📍 ${distance.toFixed(1)}km away</p>`;
-        }
+        // Note: Distance calculation will be handled in separate effect when userLocation is available
         
         if (store.phone) {
           popupContent += `<p style="margin:4px 0;font-size:${isMobile ? '15px' : '14px'};"><a href="tel:${store.phone}" style="color:#2563eb;text-decoration:none;">📞 ${store.phone}</a></p>`;
@@ -214,80 +203,6 @@ export default function StoreMapFixed({
       
       console.log('✅ Leaflet map initialized successfully with mobile optimizations!');
       console.log(`📍 Added ${validStores.length} store markers`);
-      console.log(`🎯 Target store prop:`, targetStore);
-
-      // Global debugging
-      (globalThis as any).L = L;
-      (globalThis as any).map = map;
-      
-      // Add debugging functions for testing zoom functionality
-      (globalThis as any).testZoom = (lat: number, lng: number, zoom: number = 15) => {
-        console.log(`🧪 Testing zoom to [${lat}, ${lng}] with zoom ${zoom}`);
-        if (map) {
-          map.setView([lat, lng], zoom, { animate: true, duration: 1.0 });
-          console.log(`✅ setView executed`);
-        } else {
-          console.log(`❌ Map not available`);
-        }
-      };
-      
-      (globalThis as any).testFlyTo = (lat: number, lng: number, zoom: number = 15) => {
-        console.log(`🧪 Testing flyTo [${lat}, ${lng}] with zoom ${zoom}`);
-        if (map) {
-          map.flyTo([lat, lng], zoom, { duration: 1.0 });
-          console.log(`✅ flyTo executed`);
-        } else {
-          console.log(`❌ Map not available`);
-        }
-      };
-      
-      (globalThis as any).getCurrentView = () => {
-        if (map) {
-          const center = map.getCenter();
-          const zoom = map.getZoom();
-          console.log(`📍 Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
-          return { center, zoom };
-        }
-      };
-      
-      // Add function to test target store zoom
-      (globalThis as any).testTargetStoreZoom = () => {
-        console.log(`🧪 Testing target store zoom with current targetStore:`, targetStore);
-        if (targetStore && map) {
-          const lat = parseFloat(targetStore.lat);
-          const lng = parseFloat(targetStore.lng);
-          console.log(`🧪 Zooming to target store: ${targetStore.name} at [${lat}, ${lng}]`);
-          map.setView([lat, lng], 15, { animate: true, duration: 1.0 });
-          
-          // Verify the zoom worked
-          setTimeout(() => {
-            const center = map.getCenter();
-            const zoom = map.getZoom();
-            console.log(`🧪 Test result - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
-          }, 1500);
-        } else {
-          console.log(`❌ No target store or map available`);
-        }
-      };
-      
-      // Add function to test with first store
-      (globalThis as any).testFirstStore = () => {
-        if (validStores.length > 0 && map) {
-          const firstStore = validStores[0];
-          const lat = parseFloat(firstStore.lat);
-          const lng = parseFloat(firstStore.lng);
-          console.log(`🧪 Testing with first store: ${firstStore.name} at [${lat}, ${lng}]`);
-          map.setView([lat, lng], 15, { animate: true, duration: 1.0 });
-          
-          setTimeout(() => {
-            const center = map.getCenter();
-            const zoom = map.getZoom();
-            console.log(`🧪 First store test result - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
-          }, 1500);
-        } else {
-          console.log(`❌ No stores or map available`);
-        }
-      };
 
     } catch (error) {
       console.error('❌ Error initializing map:', error);
@@ -300,14 +215,113 @@ export default function StoreMapFixed({
         mapInstance.current = null;
       }
     };
-  }, [validStores, userLocation, isMobile]);
+  }, [validStores, isMobile]); // Removed userLocation from dependency array
+
+  // Detect target store from URL parameters - MOVED AFTER map initialization
+  useEffect(() => {
+    // Only run after map is ready
+    if (!mapReady) return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeParam = urlParams.get('store');
+    const cityParam = urlParams.get('city');
+    const provinceParam = urlParams.get('province');
+    
+    console.log('🔍 CLIENT-SIDE TARGET STORE DETECTION (AFTER MAP READY):');
+    console.log('- URL parameters:', { store: storeParam, city: cityParam, province: provinceParam });
+    
+    if (storeParam) {
+      // Set the ref immediately to prevent bounds effect
+      hasTargetStoreRef.current = true;
+      
+      // Decode the URL parameter
+      const decodedStoreName = decodeURIComponent(storeParam);
+      console.log(`- Looking for store: "${decodedStoreName}"`);
+      
+      // Try exact match with decoded name first (case-insensitive)
+      let foundStore = stores.find(store => 
+        store.name.toLowerCase() === decodedStoreName.toLowerCase()
+      ) || null;
+      
+      if (!foundStore) {
+        // Try exact match with original (in case it wasn't encoded) (case-insensitive)
+        console.log(`- Trying with original name: "${storeParam}"`);
+        foundStore = stores.find(store => 
+          store.name.toLowerCase() === storeParam.toLowerCase()
+        ) || null;
+      }
+      
+      if (!foundStore) {
+        // Try partial match (case-insensitive)
+        console.log(`- Trying partial match...`);
+        foundStore = stores.find(store => 
+          store.name.toLowerCase().includes(decodedStoreName.toLowerCase()) ||
+          decodedStoreName.toLowerCase().includes(store.name.toLowerCase())
+        ) || null;
+      }
+      
+      if (foundStore) {
+        console.log(`✅ Found target store: "${foundStore.name}" at [${foundStore.lat}, ${foundStore.lng}]`);
+        console.log(`🎯 CALLING setTargetStore with:`, foundStore);
+        setTargetStore(foundStore);
+        console.log(`🎯 setTargetStore called - targetStore should update`);
+      } else {
+        console.log(`❌ No store found matching: "${decodedStoreName}"`);
+        console.log(`- Available stores (first 5):`, stores.slice(0, 5).map(s => s.name));
+        hasTargetStoreRef.current = false; // Reset if no store found
+      }
+    } else if (cityParam && provinceParam) {
+      // If city and province are specified, find stores in that area
+      hasTargetStoreRef.current = true;
+      const cityStores = stores.filter(store => 
+        store.city.toLowerCase() === cityParam.toLowerCase() && 
+        store.province.toLowerCase() === provinceParam.toLowerCase()
+      );
+      if (cityStores.length > 0) {
+        const foundStore = cityStores[0]; // Use first store as focus point
+        console.log(`✅ Found city/province target: "${foundStore.name}"`);
+        setTargetStore(foundStore);
+      } else {
+        hasTargetStoreRef.current = false; // Reset if no store found
+      }
+    } else {
+      // No target store parameters
+      hasTargetStoreRef.current = false;
+    }
+  }, [stores, mapReady]); // Run when map becomes ready
+
+  // Separate effect to handle user location marker
+  useEffect(() => {
+    if (!mapInstance.current || !userLocation) return;
+
+    console.log('📍 Adding user location marker...');
+    
+    // Remove existing user location marker if any
+    mapInstance.current.eachLayer((layer: any) => {
+      if (layer.options && layer.options.className === 'user-location-marker') {
+        mapInstance.current!.removeLayer(layer);
+      }
+    });
+
+    // Add new user location marker
+    const userMarker = new Marker([userLocation.latitude, userLocation.longitude], {
+      icon: (globalThis as any).userIcon,
+      className: 'user-location-marker'
+    } as any);
+    
+    userMarker.addTo(mapInstance.current);
+    userMarker.bindPopup("📍 Your Location");
+    
+    console.log(`✅ User location marker added at [${userLocation.latitude}, ${userLocation.longitude}]`);
+  }, [userLocation, mapReady]);
 
   // Handle target store focusing - this is the main effect for zoom functionality
   useEffect(() => {
-    console.log(`🎯 TARGET STORE EFFECT - mapReady: ${mapReady}, targetStore:`, targetStore?.name || 'null');
+    const timestamp = Date.now();
+    console.log(`🎯 [${timestamp}] TARGET STORE EFFECT - mapReady: ${mapReady}, targetStore:`, targetStore?.name || 'null');
     
     if (!mapInstance.current || !mapReady) {
-      console.log(`❌ Map not ready - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}`);
+      console.log(`❌ [${timestamp}] Map not ready - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}`);
       return;
     }
 
@@ -317,11 +331,11 @@ export default function StoreMapFixed({
         const targetLat = parseFloat(targetStore.lat);
         const targetLng = parseFloat(targetStore.lng);
         
-        console.log(`🎯 Target store: ${targetStore.name}`);
-        console.log(`🎯 Coordinates: lat=${targetLat}, lng=${targetLng}`);
+        console.log(`🎯 [${timestamp + 100}] Target store: ${targetStore.name}`);
+        console.log(`🎯 [${timestamp + 100}] Coordinates: lat=${targetLat}, lng=${targetLng}`);
         
         if (!isNaN(targetLat) && !isNaN(targetLng)) {
-          console.log(`🎯 EXECUTING setView to [${targetLat}, ${targetLng}] with zoom 15`);
+          console.log(`🎯 [${timestamp + 100}] EXECUTING setView to [${targetLat}, ${targetLng}] with zoom 15`);
           
           // Use setView to focus on the target store - based on Context7 docs
           if (mapInstance.current) {
@@ -330,29 +344,29 @@ export default function StoreMapFixed({
               duration: 1.5
             });
             
-            console.log(`✅ setView command executed`);
+            console.log(`✅ [${timestamp + 100}] setView command executed`);
             
             // Verify the view was set correctly
             setTimeout(() => {
               if (mapInstance.current) {
                 const center = mapInstance.current.getCenter();
                 const zoom = mapInstance.current.getZoom();
-                console.log(`📍 Verification - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
+                console.log(`📍 [${timestamp + 2100}] Verification - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
               }
             }, 2000);
             
             // Find and open the popup for the target store
             setTimeout(() => {
               if (mapInstance.current) {
-                console.log(`🔍 Looking for marker to open popup...`);
+                console.log(`🔍 [${timestamp + 2600}] Looking for marker to open popup...`);
                 mapInstance.current.eachLayer((layer: any) => {
                   if (layer instanceof L.Marker) {
                     const markerLatLng = layer.getLatLng();
                     const latDiff = Math.abs(markerLatLng.lat - targetLat);
                     const lngDiff = Math.abs(markerLatLng.lng - targetLng);
-                    console.log(`📍 Checking marker at ${markerLatLng.lat}, ${markerLatLng.lng} - diff: lat=${latDiff}, lng=${lngDiff}`);
+                    console.log(`📍 [${timestamp + 2600}] Checking marker at ${markerLatLng.lat}, ${markerLatLng.lng} - diff: lat=${latDiff}, lng=${lngDiff}`);
                     if (latDiff < 0.0001 && lngDiff < 0.0001) {
-                      console.log(`✅ Found matching marker, opening popup`);
+                      console.log(`✅ [${timestamp + 2600}] Found matching marker, opening popup`);
                       layer.openPopup();
                     }
                   }
@@ -363,28 +377,38 @@ export default function StoreMapFixed({
           
           return; // Exit early when we have a target store - DON'T run fitBounds
         } else {
-          console.log(`❌ Invalid coordinates: lat=${targetLat}, lng=${targetLng}`);
+          console.log(`❌ [${timestamp + 100}] Invalid coordinates: lat=${targetLat}, lng=${targetLng}`);
         }
+      } else {
+        console.log(`ℹ️ [${timestamp + 100}] No target store in target effect`);
       }
-    }, 100); // Small delay to ensure map is fully ready
+    }, 50); // Reduced delay to run before bounds effect
 
     return () => clearTimeout(timer);
-  }, [mapReady, targetStore]);
+  }, [mapReady, targetStore]); // Only depend on mapReady and targetStore
 
   // Separate effect for fitting bounds when NO target store is specified
   useEffect(() => {
-    console.log(`🗺️ BOUNDS EFFECT - mapReady: ${mapReady}, targetStore: ${!!targetStore}, validStores: ${validStores.length}`);
+    const timestamp = Date.now();
+    console.log(`🗺️ [${timestamp}] BOUNDS EFFECT TRIGGERED - mapReady: ${mapReady}, targetStore: ${!!targetStore}, hasTargetStoreRef: ${hasTargetStoreRef.current}, validStores: ${validStores.length}`);
     
-    // Only run this effect if there's NO target store
-    if (!mapInstance.current || !mapReady || targetStore || validStores.length === 0) {
-      console.log(`❌ Bounds effect skipped - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}, hasTargetStore: ${!!targetStore}, validStores: ${validStores.length}`);
+    // Only run this effect if there's NO target store (check both state and ref)
+    if (!mapInstance.current || !mapReady || targetStore || hasTargetStoreRef.current || validStores.length === 0) {
+      console.log(`❌ [${timestamp}] Bounds effect skipped - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}, hasTargetStore: ${!!targetStore}, hasTargetStoreRef: ${hasTargetStoreRef.current}, validStores: ${validStores.length}`);
       return;
     }
 
     // Default behavior: fit to all stores when no target store
-    console.log(`ℹ️ No target store, fitting to all ${validStores.length} stores`);
+    console.log(`ℹ️ [${timestamp}] No target store, fitting to all ${validStores.length} stores`);
 
     const timer = setTimeout(() => {
+      // Double-check targetStore and ref haven't been set since the effect started
+      if (targetStore || hasTargetStoreRef.current) {
+        console.log(`❌ [${timestamp + 300}] Bounds effect cancelled - targetStore: ${!!targetStore}, hasTargetStoreRef: ${hasTargetStoreRef.current}`);
+        return;
+      }
+      
+      console.log(`🗺️ [${timestamp + 300}] BOUNDS EFFECT EXECUTING fitBounds`);
       try {
         let bounds: L.LatLngBounds | null = null;
         
@@ -405,19 +429,20 @@ export default function StoreMapFixed({
         }
 
         if (bounds && mapInstance.current) {
-          console.log(`🗺️ Fitting bounds to all stores`);
+          console.log(`🗺️ [${timestamp + 300}] Fitting bounds to all stores`);
           mapInstance.current.fitBounds(bounds, { 
             padding: isMobile ? [40, 40] : [20, 20],
             maxZoom: isMobile ? 15 : 16
           });
+          console.log(`🗺️ [${timestamp + 300}] fitBounds executed`);
         }
       } catch (error) {
         console.error('Error fitting bounds:', error);
       }
-    }, 200); // Slightly longer delay to ensure target store effect runs first
+    }, 300); // Longer delay to ensure target store effect runs first
 
     return () => clearTimeout(timer);
-  }, [mapReady, targetStore, validStores, userLocation, isMobile]);
+  }, [mapReady, validStores, userLocation, isMobile]); // Removed targetStore from dependency array to prevent re-runs
 
   return (
     <div className={`relative ${className}`} style={{ height }}>

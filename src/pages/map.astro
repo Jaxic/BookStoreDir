@@ -10,49 +10,8 @@ const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
 const { records } = await parseBookstores(csvPath);
 const stores: ProcessedBookstore[] = records.map(processBookstore);
 
-// Get URL parameters for store focusing
-const url = new URL(Astro.request.url);
-const targetStoreName = url.searchParams.get('store');
-const targetCity = url.searchParams.get('city');
-const targetProvince = url.searchParams.get('province');
-
-// Find the target store if specified
-let targetStore: ProcessedBookstore | null = null;
-
-if (targetStoreName) {
-  targetStore = stores.find(store => 
-    store.name.toLowerCase() === targetStoreName.toLowerCase()
-  ) || null;
-} else if (targetCity && targetProvince) {
-  // If city and province are specified, find stores in that area
-  const cityStores = stores.filter(store => 
-    store.city.toLowerCase() === targetCity.toLowerCase() && 
-    store.province.toLowerCase() === targetProvince.toLowerCase()
-  );
-  if (cityStores.length > 0) {
-    targetStore = cityStores[0]; // Use first store as focus point
-  }
-}
-
-console.log(`🗺️ MAP PAGE DEBUG:`);
-console.log(`- Loaded ${stores.length} stores for full-screen map`);
-console.log(`- URL: ${Astro.request.url}`);
-console.log(`- URL parameters - store: "${targetStoreName}", city: "${targetCity}", province: "${targetProvince}"`);
-if (targetStore) {
-  console.log(`✅ Found target store: ${targetStore.name} in ${targetStore.city}, ${targetStore.province}`);
-  console.log(`✅ Target store coordinates: lat=${targetStore.lat}, lng=${targetStore.lng}`);
-} else {
-  console.log(`❌ No target store found`);
-  if (targetStoreName) {
-    console.log(`❌ Available store names (first 10):`, stores.map(s => s.name).slice(0, 10));
-    console.log(`❌ Searching for: "${targetStoreName}"`);
-    // Try case-insensitive search with more details
-    const matches = stores.filter(store => 
-      store.name.toLowerCase().includes(targetStoreName.toLowerCase())
-    );
-    console.log(`❌ Partial matches found:`, matches.map(s => s.name));
-  }
-}
+// Remove server-side URL parameter processing - handle everything client-side
+console.log(`🗺️ MAP PAGE: Loaded ${stores.length} stores for full-screen map`);
 ---
 
 <html lang="en">
@@ -62,8 +21,7 @@ if (targetStore) {
     <title>Full-Screen Bookstore Map - BookDir</title>
     <meta name="description" content="Interactive full-screen map showing {stores.length} independent bookstores across Canada. Find stores near you with detailed information and directions.">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS is handled by Astro integration, no CDN needed -->
   </head>
   <body class="bg-gray-50">
     <!-- Navigation Header -->
@@ -113,7 +71,6 @@ if (targetStore) {
               <div class="ml-3">
                 <p class="text-sm font-medium text-blue-900">
                   Showing {stores.length} bookstores across Canada
-                  {targetStore && <span class="ml-2 px-2 py-1 bg-yellow-200 text-yellow-800 text-xs rounded">🎯 Focusing on: {targetStore.name}</span>}
                 </p>
                 <p class="text-xs text-blue-700">
                   Click markers for store details • Use controls to navigate • Enable location for nearby stores
@@ -146,9 +103,17 @@ if (targetStore) {
 
       <!-- Map Container -->
       <div class="h-[calc(100vh-140px)] w-full">
-        <StoreMapFixed client:only="react" stores={stores} height="100%" targetStore={targetStore} />
+        <StoreMapFixed client:only="react" stores={stores} height="100%" />
       </div>
     </main>
+
+    <!-- Client-side script for basic functionality -->
+    <script define:vars={{ 
+      totalStores: stores.length
+    }}>
+      // Basic store count logging
+      console.log(`🗺️ Map loaded with ${totalStores} bookstores`);
+    </script>
   </body>
 </html>
 
