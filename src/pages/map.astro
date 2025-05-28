@@ -19,14 +19,6 @@ const targetProvince = url.searchParams.get('province');
 // Find the target store if specified
 let targetStore: ProcessedBookstore | null = null;
 
-// FOR TESTING: Always use the first store to test zoom functionality
-if (stores.length > 0) {
-  targetStore = stores[0];
-  console.log(`🧪 TESTING MODE: Using first store for zoom test: ${targetStore.name}`);
-}
-
-// Original logic (commented out for testing)
-/*
 if (targetStoreName) {
   targetStore = stores.find(store => 
     store.name.toLowerCase() === targetStoreName.toLowerCase()
@@ -41,7 +33,6 @@ if (targetStoreName) {
     targetStore = cityStores[0]; // Use first store as focus point
   }
 }
-*/
 
 console.log(`🗺️ MAP PAGE DEBUG:`);
 console.log(`- Loaded ${stores.length} stores for full-screen map`);
