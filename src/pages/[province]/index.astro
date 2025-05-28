@@ -228,15 +228,17 @@ let showOtherCities = false;
             ))}
           </div>
           <script>
-            const btn = document.getElementById('toggle-other-cities');
-            const list = document.getElementById('other-cities-list');
-            if (btn && list) {
-              btn.addEventListener('click', () => {
-                const isOpen = list.classList.toggle('hidden') === false;
-                btn.setAttribute('aria-expanded', isOpen);
-                btn.textContent = isOpen ? 'Hide Other Cities' : 'Show Other Cities';
-              });
-            }
+            document.addEventListener('DOMContentLoaded', function() {
+              const btn = document.getElementById('toggle-other-cities');
+              const list = document.getElementById('other-cities-list');
+              if (btn && list) {
+                btn.addEventListener('click', () => {
+                  const isOpen = list.classList.toggle('hidden') === false;
+                  btn.setAttribute('aria-expanded', isOpen);
+                  btn.textContent = isOpen ? 'Hide Other Cities' : 'Show Other Cities';
+                });
+              }
+            });
           </script>
         </div>
       )}
