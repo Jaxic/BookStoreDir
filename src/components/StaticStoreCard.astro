@@ -1,5 +1,6 @@
 ---
 import { generateStoreSlug } from '../utils/slugify';
+import { getStoreImageByName } from '../utils/images';
 
 interface Props {
   store: any;
@@ -16,13 +17,7 @@ const rating = parseFloat(store.rating || '0');
 const numReviews = parseInt(store.num_reviews || '0');
 
 // Get store image with fallback
-const getStoreImage = (storeName: string) => {
-  // Sanitize store name to match local file naming
-  const sanitized = storeName.replace(/[^a-zA-Z0-9]/g, '_');
-  return `/images/StoreImages/${sanitized}.jpg`;
-};
-
-const storeImage = getStoreImage(store.name);
+const storeImage = getStoreImageByName(store.name);
 const fallbackImage = '/images/default-bookstore.jpg';
 ---
 
