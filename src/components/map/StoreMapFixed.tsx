@@ -31,10 +31,13 @@ export default function StoreMapFixed({
 }: StoreMapFixedProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationPermission, setLocationPermission] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [targetStore, setTargetStore] = useState<ProcessedBookstore | null>(null);
@@ -61,16 +64,66 @@ export default function StoreMapFixed({
     });
   }, [stores]);
 
-  // Get user's location
+  // Check geolocation permission status
   useEffect(() => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
       console.warn('Geolocation not supported');
       setLocationError('Geolocation not supported');
-      setIsLoadingLocation(false);
+      setLocationPermission('denied');
       return;
     }
 
-    console.log('Attempting to get user location...');
+    // Check if Permissions API is supported
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        console.log(`🔍 Geolocation permission status: ${result.state}`);
+        setLocationPermission(result.state as 'granted' | 'denied' | 'prompt');
+        
+        if (result.state === 'granted') {
+          // Permission already granted, get location immediately
+          getCurrentLocation();
+        } else if (result.state === 'prompt') {
+          // Show UI to request permission
+          setShowLocationPrompt(true);
+        } else if (result.state === 'denied') {
+          setLocationError('Location access denied');
+        }
+
+        // Listen for permission changes
+        result.addEventListener('change', () => {
+          console.log(`🔄 Geolocation permission changed to: ${result.state}`);
+          setLocationPermission(result.state as 'granted' | 'denied' | 'prompt');
+          
+          if (result.state === 'granted') {
+            getCurrentLocation();
+            setShowLocationPrompt(false);
+          } else if (result.state === 'denied') {
+            setLocationError('Location access denied');
+            setShowLocationPrompt(false);
+          }
+        });
+      }).catch((error) => {
+        console.warn('Permissions API not fully supported:', error);
+        // Fallback: show prompt to request location
+        setShowLocationPrompt(true);
+        setLocationPermission('prompt');
+      });
+    } else {
+      // Permissions API not supported, show prompt
+      console.warn('Permissions API not supported');
+      setShowLocationPrompt(true);
+      setLocationPermission('prompt');
+    }
+  }, []);
+
+  // Function to get current location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) return;
+
+    setIsLoadingLocation(true);
+    setLocationError(null);
+    
+    console.log('📍 Requesting user location...');
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -80,20 +133,90 @@ export default function StoreMapFixed({
         };
         setUserLocation(userPos);
         setIsLoadingLocation(false);
+        setLocationError(null);
+        setShowLocationPrompt(false);
         console.log(`✅ Successfully got user location: ${userPos.latitude}, ${userPos.longitude}`);
+        
+        // Add user marker to map if map is ready
+        if (mapInstance.current) {
+          addUserMarker(userPos.latitude, userPos.longitude);
+        }
       },
       (error) => {
         console.error('❌ Error getting location:', error);
-        setLocationError(`Location access denied: ${error.message}`);
         setIsLoadingLocation(false);
+        
+        let errorMessage = 'Unable to get your location';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied by user';
+            setLocationPermission('denied');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out';
+            break;
+        }
+        setLocationError(errorMessage);
+        setShowLocationPrompt(false);
       },
       { 
         timeout: 15000, 
-        enableHighAccuracy: false,
+        enableHighAccuracy: true,
         maximumAge: 300000 
       }
     );
-  }, []);
+  };
+
+  // Function to request location permission (must be called from user interaction)
+  const requestLocationPermission = () => {
+    console.log('🔐 Requesting location permission...');
+    getCurrentLocation();
+  };
+
+  // Function to add user marker to map
+  const addUserMarker = (lat: number, lng: number) => {
+    if (!mapInstance.current) return;
+
+    // Remove existing user marker
+    if (userMarkerRef.current) {
+      mapInstance.current.removeLayer(userMarkerRef.current);
+    }
+
+    const userIconSize = isMobile ? 20 : 16;
+    const userIcon = new L.DivIcon({
+      className: 'user-location-icon',
+      html: `<div style='background-color:#ef4444;width:${userIconSize}px;height:${userIconSize}px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;'>
+        <div style='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;background-color:white;border-radius:50%;'></div>
+      </div>`,
+      iconSize: [userIconSize, userIconSize],
+      iconAnchor: [userIconSize/2, userIconSize/2]
+    });
+
+    // Create user marker
+    const userMarker = new L.Marker([lat, lng], {
+      icon: userIcon,
+      zIndexOffset: 1000 // Ensure user marker appears above store markers
+    });
+
+    userMarker.bindPopup(`
+      <div style="font-family:system-ui,sans-serif;text-align:center;min-width:150px;">
+        <h3 style="margin:0 0 8px 0;font-size:16px;font-weight:bold;color:#ef4444;">📍 Your Location</h3>
+        <p style="margin:0;color:#666;font-size:14px;">Lat: ${lat.toFixed(6)}</p>
+        <p style="margin:0;color:#666;font-size:14px;">Lng: ${lng.toFixed(6)}</p>
+      </div>
+    `, {
+      closeButton: true,
+      autoPan: true
+    });
+
+    userMarker.addTo(mapInstance.current);
+    userMarkerRef.current = userMarker;
+
+    console.log('✅ Added user location marker to map');
+  };
 
   // Initialize map
   useEffect(() => {
@@ -290,29 +413,11 @@ export default function StoreMapFixed({
     }
   }, [stores, mapReady]); // Run when map becomes ready
 
-  // Separate effect to handle user location marker
+  // Add user location marker when location is available and map is ready
   useEffect(() => {
-    if (!mapInstance.current || !userLocation) return;
-
-    console.log('📍 Adding user location marker...');
-    
-    // Remove existing user location marker if any
-    mapInstance.current.eachLayer((layer: any) => {
-      if (layer.options && layer.options.className === 'user-location-marker') {
-        mapInstance.current!.removeLayer(layer);
-      }
-    });
-
-    // Add new user location marker
-    const userMarker = new Marker([userLocation.latitude, userLocation.longitude], {
-      icon: (globalThis as any).userIcon,
-      className: 'user-location-marker'
-    } as any);
-    
-    userMarker.addTo(mapInstance.current);
-    userMarker.bindPopup("📍 Your Location");
-    
-    console.log(`✅ User location marker added at [${userLocation.latitude}, ${userLocation.longitude}]`);
+    if (userLocation && mapInstance.current && mapReady) {
+      addUserMarker(userLocation.latitude, userLocation.longitude);
+    }
   }, [userLocation, mapReady]);
 
   // Handle target store focusing - this is the main effect for zoom functionality
@@ -463,133 +568,138 @@ export default function StoreMapFixed({
         </div>
       )}
 
-      {/* Location error message */}
-      {locationError && (
-        <div className={`absolute ${isMobile ? 'top-2 left-2 right-2' : 'top-4 left-4'} bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-lg shadow-lg max-w-sm z-[1000]`}>
-          <p className={`${isMobile ? 'text-sm' : 'text-sm'}`}>
-            <strong>Location unavailable:</strong> {locationError}
-          </p>
-          <p className={`${isMobile ? 'text-xs' : 'text-xs'} mt-1`}>
-            Map will show Canada-wide view
-          </p>
+      {/* Location Error Message */}
+      {locationError && !showLocationPrompt && (
+        <div className="absolute top-4 left-4 right-4 z-[1000] bg-red-50 border border-red-200 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span className="text-sm text-red-700">{locationError}</span>
+            <button
+              onClick={() => setLocationError(null)}
+              className="ml-auto text-red-400 hover:text-red-600"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Mobile-optimized map controls */}
-      <div className={`absolute ${isMobile ? 'bottom-4 left-4 right-4' : 'top-4 right-4'} flex ${isMobile ? 'flex-row justify-between' : 'flex-col'} gap-2 z-[1000] transition-opacity duration-300 ${showControls || !isMobile ? 'opacity-100' : 'opacity-30'}`}>
-        {isMobile ? (
-          // Mobile layout - horizontal controls at bottom
-          <>
-            {userLocation && mapInstance.current && (
-              <button
-                onClick={() => {
-                  if (mapInstance.current && userLocation) {
-                    mapInstance.current.setView([userLocation.latitude, userLocation.longitude], 12);
-                  }
-                }}
-                className="bg-white shadow-lg rounded-full p-3 text-sm hover:bg-gray-50 border flex-1 max-w-[120px] flex items-center justify-center"
-              >
-                <span className="text-lg">📍</span>
-              </button>
+      {/* Map Controls */}
+      {showControls && (
+        <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+          {/* Location Button */}
+          <button
+            onClick={requestLocationPermission}
+            disabled={isLoadingLocation || locationPermission === 'denied'}
+            className={`
+              p-3 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center
+              ${isLoadingLocation 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : locationPermission === 'denied'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : userLocation
+                ? 'bg-green-500 text-white hover:bg-green-600'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+              }
+            `}
+            title={
+              locationPermission === 'denied' 
+                ? 'Location access denied' 
+                : isLoadingLocation 
+                ? 'Getting your location...' 
+                : userLocation 
+                ? 'Location found' 
+                : 'Find my location'
+            }
+          >
+            {isLoadingLocation ? (
+              <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+            ) : userLocation ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             )}
-            
-            {mapInstance.current && (
-              <button
-                onClick={() => {
-                  if (!mapInstance.current || validStores.length === 0) return;
-                  
-                  let bounds: L.LatLngBounds | null = null;
-                   
-                   validStores.forEach(store => {
-                     const lat = parseFloat(store.lat);
-                     const lng = parseFloat(store.lng);
-                     
-                     if (!bounds) {
-                       bounds = L.latLngBounds([lat, lng], [lat, lng]);
-                     } else {
-                       bounds!.extend([lat, lng]);
-                     }
-                   });
+          </button>
 
-                  if (userLocation && bounds) {
-                    (bounds as L.LatLngBounds).extend([userLocation.latitude, userLocation.longitude]);
-                  }
+          {/* Toggle Controls Button */}
+          <button
+            onClick={() => setShowControls(!showControls)}
+            className="p-3 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+            title="Toggle controls"
+          >
+            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+        </div>
+      )}
 
-                  if (bounds) {
-                    mapInstance.current.fitBounds(bounds, { 
-                      padding: [40, 40],
-                      maxZoom: 15
-                    });
-                  }
-                }}
-                className="bg-white shadow-lg rounded-full p-3 text-sm hover:bg-gray-50 border flex-1 max-w-[120px] flex items-center justify-center"
-              >
-                <span className="text-lg">🗺️</span>
-              </button>
-            )}
-            
-            <div className="bg-white shadow-lg rounded-full px-4 py-3 text-sm border flex items-center justify-center min-w-[80px]">
-              <div className="text-center">
-                <div className="font-medium text-xs">{validStores.length}</div>
-                <div className="text-xs text-gray-500">stores</div>
+      {/* Location Permission Prompt */}
+      {showLocationPrompt && (
+        <div className="absolute top-4 left-4 right-4 z-[1000] bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-gray-900 mb-1">
+                Find bookstores near you
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Allow location access to see nearby bookstores and get directions.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={requestLocationPermission}
+                  disabled={isLoadingLocation}
+                  className="px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoadingLocation ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Getting location...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Allow Location
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowLocationPrompt(false)}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+                >
+                  Not now
+                </button>
               </div>
             </div>
-          </>
-        ) : (
-          // Desktop layout - vertical controls at top right
-          <>
-            {userLocation && mapInstance.current && (
-              <button
-                onClick={() => {
-                  if (mapInstance.current && userLocation) {
-                    mapInstance.current.setView([userLocation.latitude, userLocation.longitude], 12);
-                  }
-                }}
-                className="bg-white shadow-lg rounded px-3 py-2 text-sm hover:bg-gray-50 border"
-              >
-                📍 My Location
-              </button>
-            )}
-            
-            {mapInstance.current && (
-              <button
-                onClick={() => {
-                  if (!mapInstance.current || validStores.length === 0) return;
-                  
-                                   let bounds: L.LatLngBounds | null = null;
-                     
-                     validStores.forEach(store => {
-                       const lat = parseFloat(store.lat);
-                       const lng = parseFloat(store.lng);
-                       
-                       if (!bounds) {
-                         bounds = L.latLngBounds([lat, lng], [lat, lng]);
-                       } else {
-                         bounds!.extend([lat, lng]);
-                       }
-                     });
-
-                    if (userLocation && bounds) {
-                      (bounds as L.LatLngBounds).extend([userLocation.latitude, userLocation.longitude]);
-                    }
-
-                    if (bounds) {
-                      mapInstance.current.fitBounds(bounds, { padding: [20, 20] });
-                    }
-                }}
-                className="bg-white shadow-lg rounded px-3 py-2 text-sm hover:bg-gray-50 border"
-              >
-                🗺️ Fit to Stores
-              </button>
-            )}
-            
-            <div className="bg-white shadow-lg rounded px-3 py-2 text-sm border">
-              <div className="font-medium">{validStores.length} stores</div>
-              <div className="text-xs text-gray-500">on map</div>
-            </div>
-          </>
-        )}
-      </div>
+            <button
+              onClick={() => setShowLocationPrompt(false)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Status indicator */}
       {mapReady && (

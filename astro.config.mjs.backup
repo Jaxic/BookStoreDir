@@ -1,0 +1,142 @@
+import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+  integrations: [
+    tailwind({
+      // Optimize Tailwind CSS
+      config: {
+        content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+        // Enable JIT mode for smaller CSS bundles
+        mode: 'jit',
+      }
+    }),
+    react({
+      // Enable React optimizations
+      experimentalReactChildren: true,
+    }),
+    sitemap({
+      // Generate sitemap for better SEO and crawling
+      changefreq: 'weekly',
+      priority: 0.7,
+      lastmod: new Date(),
+    })
+  ],
+  output: 'static',
+  
+  // Build optimizations
+  build: {
+    // Enable asset inlining for small files
+    inlineStylesheets: 'auto',
+    // Split chunks for better caching
+    split: true,
+    // Optimize assets
+    assets: 'assets',
+  },
+
+  // Vite configuration for advanced optimizations
+  vite: {
+    build: {
+      // Enable code splitting
+      rollupOptions: {
+        output: {
+          // Create separate chunks for vendor libraries
+          manualChunks: {
+            // React and related libraries
+            'react-vendor': ['react', 'react-dom'],
+            // Map libraries
+            'map-vendor': ['leaflet', 'leaflet.markercluster', 'maplibre-gl', 'react-map-gl'],
+            // Utility libraries
+            'utils-vendor': ['fuse.js', 'papaparse', 'csv-parse', 'zod'],
+            // Diff and validation libraries
+            'validation-vendor': ['ajv', 'ajv-formats', 'diff', 'jsondiffpatch'],
+          },
+          // Optimize chunk file names for caching
+          chunkFileNames: 'assets/js/[name]-[hash].js',
+          entryFileNames: 'assets/js/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name.split('.');
+            const ext = info[info.length - 1];
+            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
+              return `assets/images/[name]-[hash].${ext}`;
+            }
+            if (/\.(css)$/i.test(assetInfo.name)) {
+              return `assets/css/[name]-[hash].${ext}`;
+            }
+            return `assets/[ext]/[name]-[hash].${ext}`;
+          },
+        },
+      },
+      // Optimize dependencies
+      optimizeDeps: {
+        include: [
+          'react',
+          'react-dom',
+          'leaflet',
+          'fuse.js',
+          'papaparse'
+        ],
+      },
+      // Enable CSS code splitting
+      cssCodeSplit: true,
+      // Minify options
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true, // Remove console.log in production
+          drop_debugger: true,
+        },
+      },
+    },
+    // Enable CSS optimizations
+    css: {
+      devSourcemap: true,
+    },
+  },
+
+  // Image optimization settings
+  image: {
+    // Enable image optimization
+    service: {
+      entrypoint: 'astro/assets/services/sharp',
+      config: {
+        limitInputPixels: 268402689, // ~16K x 16K
+      },
+    },
+  },
+
+  // Prefetch configuration for better navigation
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
+
+  // Experimental features for performance
+  experimental: {
+    // Enable view transitions for smoother navigation
+    viewTransitions: true,
+    // Enable optimized CSS
+    optimizeHoistedScript: true,
+  },
+
+  // Server configuration for development
+  server: {
+    // Enable compression
+    compress: true,
+    // Configure headers for better caching during development
+    headers: {
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  },
+
+  // CDN and deployment optimizations
+  site: 'https://bookstore-directory.com', // Replace with actual domain
+  base: '/',
+  
+  // Security headers
+  security: {
+    checkOrigin: true,
+  },
+}); 

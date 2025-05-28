@@ -1,0 +1,72 @@
+{
+  "provider": "AWS CloudFront",
+  "endpoint": "https://d1234567890.cloudfront.net",
+  "regions": [
+    "us-east-1",
+    "eu-west-1",
+    "ap-southeast-1"
+  ],
+  "features": [
+    "edge-caching",
+    "lambda-edge",
+    "real-time-logs"
+  ],
+  "cache": {
+    "static": {
+      "ttl": 31536000,
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    "dynamic": {
+      "ttl": 300,
+      "headers": {
+        "Cache-Control": "public, max-age=300"
+      }
+    },
+    "images": {
+      "ttl": 2592000,
+      "headers": {
+        "Cache-Control": "public, max-age=2592000"
+      },
+      "optimization": {
+        "webp": true,
+        "avif": false,
+        "quality": 80,
+        "progressive": true
+      }
+    }
+  },
+  "compression": {
+    "gzip": true,
+    "brotli": true,
+    "minLevel": 6,
+    "types": [
+      "text/html",
+      "text/css",
+      "text/javascript",
+      "application/javascript",
+      "application/json"
+    ]
+  },
+  "security": {
+    "https": true,
+    "hsts": true,
+    "cors": {
+      "enabled": true,
+      "origins": [
+        "*"
+      ],
+      "methods": [
+        "GET",
+        "HEAD"
+      ]
+    }
+  },
+  "performance": {
+    "http2": true,
+    "http3": false,
+    "prefetch": false,
+    "preload": []
+  }
+}

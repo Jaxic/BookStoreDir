@@ -1,0 +1,81 @@
+{
+  "provider": "Cloudflare",
+  "endpoint": "https://cdn.bookstore-directory.com",
+  "regions": [
+    "global"
+  ],
+  "features": [
+    "edge-caching",
+    "image-optimization",
+    "brotli",
+    "http3"
+  ],
+  "cache": {
+    "static": {
+      "ttl": 31536000,
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Expires": "Wed, 27 May 2026 23:33:01 GMT"
+      }
+    },
+    "dynamic": {
+      "ttl": 300,
+      "headers": {
+        "Cache-Control": "public, max-age=300, s-maxage=3600"
+      }
+    },
+    "images": {
+      "ttl": 2592000,
+      "headers": {
+        "Cache-Control": "public, max-age=2592000, immutable"
+      },
+      "optimization": {
+        "webp": true,
+        "avif": true,
+        "quality": 85,
+        "progressive": true
+      }
+    }
+  },
+  "compression": {
+    "gzip": true,
+    "brotli": true,
+    "minLevel": 6,
+    "types": [
+      "text/html",
+      "text/css",
+      "text/javascript",
+      "application/javascript",
+      "application/json",
+      "image/svg+xml",
+      "application/xml",
+      "text/xml"
+    ]
+  },
+  "security": {
+    "https": true,
+    "hsts": true,
+    "cors": {
+      "enabled": true,
+      "origins": [
+        "https://bookstore-directory.com",
+        "https://www.bookstore-directory.com"
+      ],
+      "methods": [
+        "GET",
+        "HEAD",
+        "OPTIONS"
+      ]
+    }
+  },
+  "performance": {
+    "http2": true,
+    "http3": true,
+    "prefetch": true,
+    "preload": [
+      "/assets/css/main.css",
+      "/assets/js/main.js",
+      "/assets/fonts/inter.woff2"
+    ]
+  }
+}

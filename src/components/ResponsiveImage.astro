@@ -1,0 +1,122 @@
+---
+// ResponsiveImage.astro
+// Responsive image component with lazy loading and modern format support
+
+export interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  class?: string;
+  priority?: boolean;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  loading = 'lazy',
+  class: className = '',
+  priority = false,
+} = Astro.props;
+
+// Generate srcset for different formats and sizes
+const generateSrcSet = (baseSrc: string, format: string) => {
+  const breakpoints = [320, 640, 768, 1024, 1280, 1920];
+  const baseName = baseSrc.replace(/\.[^/.]+$/, '');
+  const optimizedPath = baseSrc.replace('/images/', '/images/optimized/');
+  
+  return breakpoints
+    .map(bp => `${optimizedPath.replace(/\.[^/.]+$/, '')}.${format} ${bp}w`)
+    .join(', ');
+};
+
+const baseName = src.replace(/\.[^/.]+$/, '');
+const optimizedPath = src.replace('/images/', '/images/optimized/');
+---
+
+<picture class={className}>
+  <!-- AVIF format (best compression) -->
+  <source
+    srcset={generateSrcSet(src, 'avif')}
+    sizes={sizes}
+    type="image/avif"
+  />
+  
+  <!-- WebP format (good compression, wide support) -->
+  <source
+    srcset={generateSrcSet(src, 'webp')}
+    sizes={sizes}
+    type="image/webp"
+  />
+  
+  <!-- Fallback to original format -->
+  <img
+    src={optimizedPath}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={priority ? 'eager' : loading}
+    decoding="async"
+    class="responsive-image"
+    style="aspect-ratio: auto;"
+  />
+</picture>
+
+<style>
+  .responsive-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+  
+  .responsive-image[loading="lazy"] {
+    opacity: 0;
+  }
+  
+  .responsive-image.loaded {
+    opacity: 1;
+  }
+  
+  /* Blur placeholder effect */
+  .responsive-image.loading {
+    filter: blur(5px);
+    transform: scale(1.05);
+  }
+</style>
+
+<script>
+  // Lazy loading intersection observer
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement;
+          
+          // Load the image
+          img.onload = () => {
+            img.classList.remove('loading');
+            img.classList.add('loaded');
+          };
+          
+          // Stop observing this image
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: '50px 0px',
+      threshold: 0.01
+    });
+
+    // Observe all lazy images
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+      img.classList.add('loading');
+      imageObserver.observe(img);
+    });
+  }
+</script>

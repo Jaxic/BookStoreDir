@@ -10,59 +10,60 @@
     "lint": "echo 'Linting completed'",
     "test": "echo 'Tests completed'",
     "coverage": "echo 'Coverage report generated'",
-    
     "validate:csv": "tsx scripts/ci-cd-integration.ts --environment development --validation-level basic",
     "validate:csv:comprehensive": "tsx scripts/ci-cd-integration.ts --environment development --validation-level comprehensive",
     "validate:csv:structure": "echo 'CSV structure validation completed'",
     "validate:csv:content": "echo 'CSV content validation completed'",
     "validate:csv:business-rules": "echo 'CSV business rules validation completed'",
-    
     "test:csv-monitoring": "tsx scripts/test-diff-system.ts",
     "test:csv-monitoring:post-release": "echo 'Post-release CSV monitoring tests completed'",
     "test:smoke:staging": "echo 'Staging smoke tests completed'",
     "test:health:production": "echo 'Production health checks completed'",
     "test:load": "echo 'Load testing completed'",
-    
     "backup:csv": "tsx scripts/ci-cd-integration.ts --environment development --create-backups true --generate-reports false",
     "backup:csv:incremental": "echo 'Incremental CSV backup completed'",
     "backup:csv:full": "echo 'Full CSV backup completed'",
     "backup:csv:compress": "echo 'CSV backup compression completed'",
     "backup:csv:cleanup": "echo 'CSV backup cleanup completed'",
     "backup:csv:release": "echo 'Pre-release CSV backup completed'",
-    
     "diff:csv:reports": "tsx scripts/ci-cd-integration.ts --environment development --generate-reports true --create-backups false",
     "diff:csv:comprehensive": "echo 'Comprehensive CSV diff reports generated'",
     "diff:csv:visual": "echo 'Visual CSV diff reports generated'",
     "diff:csv:summary": "echo 'CSV diff summary generated'",
-    
     "analyze:csv:quality": "echo 'CSV data quality analysis completed'",
     "analyze:csv:memory": "echo 'CSV memory usage analysis completed'",
     "check:csv:thresholds": "echo 'CSV quality thresholds checked'",
-    
     "generate:static": "echo 'Static assets generated from CSV data'",
     "generate:csv:dashboard": "echo 'CSV data quality dashboard generated'",
     "generate:csv:performance-report": "echo 'CSV performance report generated'",
     "generate:release-notes": "echo 'Release notes with CSV changes generated'",
     "generate:post-release-report": "echo 'Post-release validation report generated'",
-    
     "monitor:csv:performance": "echo 'CSV processing performance monitoring completed'",
-    
     "optimize:assets": "echo 'Asset optimization completed'",
-    
     "deploy:csv-monitoring": "echo 'CSV monitoring configuration deployed'",
     "deploy:csv-monitoring:production": "echo 'Production CSV monitoring configuration deployed'",
     "update:csv-monitoring:post-release": "echo 'Post-release CSV monitoring configuration updated'",
-    
     "validate:release-artifacts": "echo 'Release artifacts validated'",
-    
     "ci:integration": "tsx scripts/ci-cd-integration.ts --environment development --deployment-mode false",
     "ci:staging": "tsx scripts/ci-cd-integration.ts --environment staging --deployment-mode true",
     "ci:production": "tsx scripts/ci-cd-integration.ts --environment production --deployment-mode true",
-    
     "docs:maintain": "tsx scripts/documentation-maintenance.ts",
     "docs:templates": "tsx scripts/documentation-maintenance.ts templates",
     "docs:validate": "tsx scripts/documentation-maintenance.ts maintain",
-    "docs:build": "npm run docs:maintain && npm run docs:templates"
+    "docs:build": "npm run docs:maintain && npm run docs:templates",
+    "cdn:generate": "tsx scripts/cdn-config.ts generate",
+    "cdn:optimize": "tsx scripts/cdn-config.ts optimize",
+    "cdn:set-provider": "tsx scripts/cdn-config.ts set-provider",
+    "cdn:list": "tsx scripts/cdn-config.ts list",
+    "cdn:help": "tsx scripts/cdn-config.ts help",
+    "cdn:deploy": "bash config/cdn/deploy.sh",
+    "cdn:test": "bash config/cdn/test-performance.sh",
+    
+    "images:optimize": "tsx scripts/image-optimizer.ts optimize",
+    "images:help": "tsx scripts/image-optimizer.ts help",
+    
+    "code-split:analyze": "tsx scripts/code-splitting-analyzer.ts analyze",
+    "code-split:help": "tsx scripts/code-splitting-analyzer.ts help"
   },
   "keywords": [],
   "author": "",
@@ -94,8 +95,16 @@
     "zod": "^3.25.30"
   },
   "devDependencies": {
+    "@astrojs/sitemap": "^3.4.0",
     "@types/node": "^22.15.23",
     "@types/react": "^19.1.5",
-    "@types/react-dom": "^19.1.5"
+    "@types/react-dom": "^19.1.5",
+    "imagemin": "^9.0.1",
+    "imagemin-avif": "^0.1.6",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^10.0.0",
+    "imagemin-webp": "^8.0.0",
+    "sharp": "^0.34.2",
+    "terser": "^5.40.0"
   }
 }

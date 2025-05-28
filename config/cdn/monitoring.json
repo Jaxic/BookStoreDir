@@ -1,0 +1,48 @@
+{
+  "providers": [
+    "cloudflare",
+    "cloudfront",
+    "vercel"
+  ],
+  "activeProvider": "cloudflare",
+  "monitoring": {
+    "uptime": {
+      "enabled": true,
+      "interval": 60,
+      "timeout": 10,
+      "endpoints": [
+        "/",
+        "/stores",
+        "/map",
+        "/assets/css/main.css",
+        "/images/default-bookstore.jpg"
+      ]
+    },
+    "performance": {
+      "enabled": true,
+      "metrics": [
+        "time_total",
+        "time_starttransfer",
+        "size_download",
+        "speed_download"
+      ],
+      "thresholds": {
+        "time_total": 2,
+        "time_starttransfer": 1,
+        "speed_download": 1000000
+      }
+    },
+    "alerts": {
+      "enabled": true,
+      "channels": [
+        "email",
+        "slack"
+      ],
+      "conditions": [
+        "uptime < 99%",
+        "time_total > 3s",
+        "speed_download < 500000"
+      ]
+    }
+  }
+}

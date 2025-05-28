@@ -1,0 +1,71 @@
+{
+  "provider": "Vercel Edge Network",
+  "endpoint": "https://bookstore-directory.vercel.app",
+  "regions": [
+    "global"
+  ],
+  "features": [
+    "edge-functions",
+    "image-optimization",
+    "analytics"
+  ],
+  "cache": {
+    "static": {
+      "ttl": 31536000,
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    "dynamic": {
+      "ttl": 0,
+      "headers": {
+        "Cache-Control": "public, max-age=0, s-maxage=86400"
+      }
+    },
+    "images": {
+      "ttl": 31536000,
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "optimization": {
+        "webp": true,
+        "avif": true,
+        "quality": 75,
+        "progressive": true
+      }
+    }
+  },
+  "compression": {
+    "gzip": true,
+    "brotli": true,
+    "minLevel": 6,
+    "types": [
+      "text/*",
+      "application/javascript",
+      "application/json"
+    ]
+  },
+  "security": {
+    "https": true,
+    "hsts": true,
+    "cors": {
+      "enabled": true,
+      "origins": [
+        "*"
+      ],
+      "methods": [
+        "GET",
+        "HEAD",
+        "OPTIONS"
+      ]
+    }
+  },
+  "performance": {
+    "http2": true,
+    "http3": true,
+    "prefetch": true,
+    "preload": [
+      "/assets/css/main.css"
+    ]
+  }
+}
