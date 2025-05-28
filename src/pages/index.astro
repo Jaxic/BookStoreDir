@@ -5,7 +5,6 @@ import type { ProcessedBookstore } from '../types/bookstore';
 import StoreMapFixed from '../components/map/StoreMapFixed';
 import Navigation from '../components/Navigation.astro';
 import path from 'path';
-import GeoButtonsScript from '../components/GeoButtonsScript.astro';
 
 // Load and process bookstore data
 const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
@@ -316,6 +315,6 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       </div>
     </footer>
 
-    <GeoButtonsScript client:load />
+    <script type="module" src="/js/geo-buttons.js"></script>
   </body>
 </html> 
