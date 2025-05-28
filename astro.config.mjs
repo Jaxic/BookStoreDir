@@ -166,6 +166,7 @@ export default defineConfig({
     
     // Development optimizations
     server: {
+      host: '0.0.0.0', // Allow external connections
       fs: {
         allow: ['..'],
       },

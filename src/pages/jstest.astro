@@ -1,0 +1,160 @@
+---
+// Ultra-minimal JavaScript test
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JS Test - BookDir</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      .test-box {
+        background: white;
+        padding: 20px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+      }
+      .success { border-color: #22c55e; background: #f0fdf4; }
+      .error { border-color: #ef4444; background: #fef2f2; }
+      .pending { border-color: #3b82f6; background: #eff6ff; }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 JavaScript Test</h1>
+    
+    <div id="test1" class="test-box pending">
+      <h3>Test 1: Basic JavaScript</h3>
+      <p id="test1-result">⏳ Testing basic JS execution...</p>
+    </div>
+    
+    <div id="test2" class="test-box pending">
+      <h3>Test 2: DOM Manipulation</h3>
+      <p id="test2-result">⏳ Testing DOM access...</p>
+    </div>
+    
+    <div id="test3" class="test-box pending">
+      <h3>Test 3: Event Listeners</h3>
+      <p id="test3-result">⏳ Testing event handling...</p>
+      <button id="test-button" style="padding: 10px; margin-top: 10px;">Click me!</button>
+    </div>
+    
+    <div id="test4" class="test-box pending">
+      <h3>Test 4: Async Operations</h3>
+      <p id="test4-result">⏳ Testing setTimeout...</p>
+    </div>
+    
+    <div id="debug" class="test-box">
+      <h3>🐛 Debug Info</h3>
+      <div id="debug-info">Loading debug info...</div>
+    </div>
+
+    <script>
+      console.log('🧪 JavaScript test script started');
+      
+      // Test 1: Basic JavaScript execution
+      try {
+        document.getElementById('test1-result').textContent = '✅ Basic JavaScript works!';
+        document.getElementById('test1').className = 'test-box success';
+        console.log('✅ Test 1 passed: Basic JavaScript');
+      } catch (e) {
+        document.getElementById('test1-result').textContent = '❌ Error: ' + e.message;
+        document.getElementById('test1').className = 'test-box error';
+        console.error('❌ Test 1 failed:', e);
+      }
+      
+      // Test 2: DOM Manipulation
+      try {
+        const testDiv = document.createElement('div');
+        testDiv.textContent = 'DOM element created successfully';
+        document.getElementById('test2-result').textContent = '✅ DOM manipulation works!';
+        document.getElementById('test2').className = 'test-box success';
+        console.log('✅ Test 2 passed: DOM manipulation');
+      } catch (e) {
+        document.getElementById('test2-result').textContent = '❌ Error: ' + e.message;
+        document.getElementById('test2').className = 'test-box error';
+        console.error('❌ Test 2 failed:', e);
+      }
+      
+      // Test 3: Event Listeners
+      try {
+        document.getElementById('test-button').addEventListener('click', function() {
+          document.getElementById('test3-result').textContent = '✅ Event listeners work!';
+          document.getElementById('test3').className = 'test-box success';
+          console.log('✅ Test 3 passed: Event listeners');
+        });
+        
+        // Auto-trigger after 2 seconds if not clicked
+        setTimeout(() => {
+          if (document.getElementById('test3').className.includes('pending')) {
+            document.getElementById('test3-result').textContent = '⚠️ Event listener set, but not clicked yet';
+            document.getElementById('test3').className = 'test-box';
+          }
+        }, 2000);
+        
+        console.log('✅ Test 3 setup: Event listener added');
+      } catch (e) {
+        document.getElementById('test3-result').textContent = '❌ Error: ' + e.message;
+        document.getElementById('test3').className = 'test-box error';
+        console.error('❌ Test 3 failed:', e);
+      }
+      
+      // Test 4: Async Operations
+      try {
+        setTimeout(() => {
+          try {
+            document.getElementById('test4-result').textContent = '✅ Async operations work!';
+            document.getElementById('test4').className = 'test-box success';
+            console.log('✅ Test 4 passed: Async operations');
+          } catch (e) {
+            document.getElementById('test4-result').textContent = '❌ Async error: ' + e.message;
+            document.getElementById('test4').className = 'test-box error';
+            console.error('❌ Test 4 async failed:', e);
+          }
+        }, 1000);
+        console.log('✅ Test 4 setup: setTimeout scheduled');
+      } catch (e) {
+        document.getElementById('test4-result').textContent = '❌ Error: ' + e.message;
+        document.getElementById('test4').className = 'test-box error';
+        console.error('❌ Test 4 failed:', e);
+      }
+      
+      // Debug Info
+      try {
+        const debugInfo = `
+          <strong>Browser Info:</strong><br>
+          User Agent: ${navigator.userAgent}<br>
+          Screen: ${window.innerWidth}x${window.innerHeight}<br>
+          Device Pixel Ratio: ${window.devicePixelRatio}<br>
+          Platform: ${navigator.platform}<br>
+          Language: ${navigator.language}<br>
+          Online: ${navigator.onLine}<br>
+          Cookies Enabled: ${navigator.cookieEnabled}<br>
+          <br>
+          <strong>JavaScript Features:</strong><br>
+          localStorage: ${typeof localStorage !== 'undefined'}<br>
+          sessionStorage: ${typeof sessionStorage !== 'undefined'}<br>
+          fetch: ${typeof fetch !== 'undefined'}<br>
+          Promise: ${typeof Promise !== 'undefined'}<br>
+          async/await: ${(async () => {}).constructor.name === 'AsyncFunction'}<br>
+          <br>
+          <strong>DOM Ready State:</strong> ${document.readyState}<br>
+          <strong>Current Time:</strong> ${new Date().toLocaleString()}
+        `;
+        
+        document.getElementById('debug-info').innerHTML = debugInfo;
+        console.log('✅ Debug info populated');
+      } catch (e) {
+        document.getElementById('debug-info').textContent = '❌ Debug error: ' + e.message;
+        console.error('❌ Debug failed:', e);
+      }
+      
+      console.log('🧪 JavaScript test script completed');
+    </script>
+  </body>
+</html> 

@@ -1,0 +1,130 @@
+---
+// Static map fallback for when JavaScript is disabled
+import type { ProcessedBookstore } from '../../types/bookstore';
+
+interface Props {
+  stores: ProcessedBookstore[];
+  targetStore?: string;
+}
+
+const { stores, targetStore } = Astro.props;
+
+// Find target store if specified
+const target = targetStore ? stores.find(store => 
+  store.name.toLowerCase() === targetStore.toLowerCase()
+) : null;
+
+// Calculate center point
+const centerLat = target ? target.latitude : 56.1304; // Canada center
+const centerLng = target ? target.longitude : -106.3468;
+const zoom = target ? 12 : 4;
+
+// Generate static map URL (using OpenStreetMap static map service)
+const mapWidth = 800;
+const mapHeight = 600;
+const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${centerLng},${centerLat},${zoom}/${mapWidth}x${mapHeight}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`;
+
+// Alternative: Use a simple placeholder if no API key
+const fallbackMapUrl = `https://via.placeholder.com/${mapWidth}x${mapHeight}/e5e7eb/6b7280?text=Interactive+Map+Requires+JavaScript`;
+---
+
+<div class="static-map-container">
+  <!-- Static Map Image -->
+  <div class="relative">
+    <img 
+      src={staticMapUrl}
+      alt={target ? `Map showing ${target.name}` : "Map of bookstore locations"}
+      class="w-full h-96 object-cover rounded-lg border"
+      loading="lazy"
+    />
+    
+    <!-- Overlay message -->
+    <div class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
+      <p class="text-sm font-medium">
+        📍 {target ? `Showing: ${target.name}` : `${stores.length} bookstores in Canada`}
+      </p>
+      <p class="text-xs opacity-90">Enable JavaScript for interactive map</p>
+    </div>
+  </div>
+
+  <!-- Store List Fallback -->
+  <div class="mt-6">
+    <h3 class="text-lg font-semibold mb-4">
+      {target ? 'Selected Store' : 'All Bookstore Locations'}
+    </h3>
+    
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {(target ? [target] : stores).map((store) => (
+        <div class="border rounded-lg p-4 bg-white shadow-sm">
+          <h4 class="font-semibold text-blue-600">{store.name}</h4>
+          <p class="text-sm text-gray-600 mt-1">{store.address}</p>
+          <p class="text-sm text-gray-500">{store.city}, {store.province}</p>
+          
+          {store.phone && (
+            <p class="text-sm mt-2">
+              📞 <a href={`tel:${store.phone}`} class="text-blue-600 hover:underline">
+                {store.phone}
+              </a>
+            </p>
+          )}
+          
+          {store.website && (
+            <p class="text-sm">
+              🌐 <a href={store.website} target="_blank" rel="noopener noreferrer" 
+                   class="text-blue-600 hover:underline">
+                Visit Website
+              </a>
+            </p>
+          )}
+          
+          <!-- Static map link -->
+          <p class="text-sm mt-2">
+            🗺️ <a 
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address + ', ' + store.city + ', ' + store.province)}`}
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-blue-600 hover:underline"
+            >
+              View on Google Maps
+            </a>
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Search/Filter Form (works without JS) -->
+  {!target && (
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+      <h4 class="font-semibold mb-3">Find a Specific Store</h4>
+      <form method="get" action="/map" class="flex gap-2">
+        <input 
+          type="text" 
+          name="store" 
+          placeholder="Enter store name..."
+          class="flex-1 px-3 py-2 border rounded-md"
+          list="store-names"
+        />
+        <button 
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Find Store
+        </button>
+      </form>
+      
+      <!-- Datalist for autocomplete -->
+      <datalist id="store-names">
+        {stores.map((store) => (
+          <option value={store.name} />
+        ))}
+      </datalist>
+    </div>
+  )}
+</div>
+
+<style>
+  .static-map-container {
+    /* Ensure good contrast and readability */
+  }
+</style> 

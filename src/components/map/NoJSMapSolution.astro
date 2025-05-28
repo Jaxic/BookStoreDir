@@ -1,0 +1,472 @@
+---
+// No-JavaScript Map Solution - Fully functional without any JavaScript
+import type { ProcessedBookstore } from '../../types/bookstore';
+
+interface Props {
+  stores: ProcessedBookstore[];
+  targetStore?: string;
+}
+
+const { stores, targetStore } = Astro.props;
+
+// Find target store if specified
+const target = targetStore ? stores.find(store => 
+  store.name.toLowerCase() === targetStore.toLowerCase()
+) : null;
+
+// Calculate center point
+const centerLat = target ? Number(target.latitude) : 56.1304; // Canada center
+const centerLng = target ? Number(target.longitude) : -106.3468;
+const zoom = target ? 12 : 4;
+
+// Generate static map URL using OpenStreetMap static map service
+const mapWidth = 800;
+const mapHeight = 400;
+
+// Create markers parameter for the static map
+let markersParam = '';
+if (target) {
+  // Single store marker
+  markersParam = `&markers=${target.latitude},${target.longitude},red-pushpin`;
+} else {
+  // Multiple store markers (limit to first 10 to avoid URL length issues)
+  const topStores = stores.slice(0, 10);
+  markersParam = topStores.map(store => 
+    `&markers=${store.latitude},${store.longitude},blue-pushpin`
+  ).join('');
+}
+
+// Static map URL (using a service that works without JavaScript)
+const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${centerLat},${centerLng}&zoom=${zoom}&size=${mapWidth}x${mapHeight}&maptype=roadmap${markersParam}&key=YOUR_API_KEY`;
+
+// Fallback: OpenStreetMap tile-based static image
+const osmStaticUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${centerLng-0.1},${centerLat-0.1},${centerLng+0.1},${centerLat+0.1}&layer=mapnik&marker=${centerLat},${centerLng}`;
+
+// Group stores by province for better organization
+const storesByProvince = stores.reduce((acc, store) => {
+  const province = store.province || 'Unknown';
+  if (!acc[province]) acc[province] = [];
+  acc[province].push(store);
+  return acc;
+}, {} as Record<string, ProcessedBookstore[]>);
+
+const provinces = Object.keys(storesByProvince).sort();
+---
+
+<div class="no-js-map-solution">
+  <!-- Header -->
+  <div class="map-header">
+    <h1>📍 Bookstore Locations</h1>
+    {target && <p class="target-info">📍 Showing: <strong>{target.name}</strong></p>}
+    <p class="accessibility-note">
+      ♿ This page works on all devices and browsers, including those with JavaScript disabled.
+    </p>
+  </div>
+
+  <!-- Static Map Section -->
+  <div class="static-map-section">
+    <h2>🗺️ Map View</h2>
+    
+    <!-- OpenStreetMap Embed (works without JavaScript) -->
+    <div class="map-container">
+      <iframe 
+        src={osmStaticUrl}
+        width="100%" 
+        height="400"
+        style="border: 1px solid #ccc; border-radius: 8px;"
+        title="Bookstore locations map"
+        loading="lazy">
+      </iframe>
+    </div>
+    
+    <!-- Map Info -->
+    <div class="map-info">
+      <p><strong>📍 Center:</strong> {centerLat.toFixed(4)}, {centerLng.toFixed(4)}</p>
+      <p><strong>🔍 Zoom Level:</strong> {zoom}</p>
+      <p><strong>📚 Total Stores:</strong> {stores.length}</p>
+      {target && (
+        <div class="target-details">
+          <h3>Selected Store:</h3>
+          <p><strong>{target.name}</strong></p>
+          <p>{target.address}</p>
+          <p>{target.city}, {target.province}</p>
+          <p>📞 {target.phone || 'Phone not available'}</p>
+          {target.website && (
+            <p>🌐 <a href={target.website} target="_blank" rel="noopener">Visit Website</a></p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Store Directory -->
+  <div class="store-directory">
+    <h2>📚 Complete Store Directory</h2>
+    
+    <!-- Quick Navigation -->
+    <div class="province-nav">
+      <h3>Quick Navigation by Province:</h3>
+      <div class="province-links">
+        {provinces.map(province => (
+          <a href={`#province-${province.toLowerCase().replace(/\s+/g, '-')}`} class="province-link">
+            {province} ({storesByProvince[province].length})
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Store Listings by Province -->
+    {provinces.map(province => (
+      <div class="province-section" id={`province-${province.toLowerCase().replace(/\s+/g, '-')}`}>
+        <h3 class="province-title">
+          📍 {province} ({storesByProvince[province].length} stores)
+        </h3>
+        
+        <div class="stores-grid">
+          {storesByProvince[province].map(store => (
+            <div class="store-card" class:list={[{ 'highlighted': target && store.name === target.name }]}>
+              <div class="store-header">
+                <h4 class="store-name">{store.name}</h4>
+                {target && store.name === target.name && (
+                  <span class="current-marker">📍 Current</span>
+                )}
+              </div>
+              
+              <div class="store-details">
+                <p class="address">
+                  📍 {store.address}<br>
+                  {store.city}, {store.province}
+                </p>
+                
+                {store.phone && (
+                  <p class="phone">📞 <a href={`tel:${store.phone}`}>{store.phone}</a></p>
+                )}
+                
+                {store.website && (
+                  <p class="website">
+                    🌐 <a href={store.website} target="_blank" rel="noopener">Visit Website</a>
+                  </p>
+                )}
+                
+                <div class="coordinates">
+                  🧭 {Number(store.latitude).toFixed(4)}, {Number(store.longitude).toFixed(4)}
+                </div>
+                
+                <!-- Direct map link -->
+                <div class="map-actions">
+                  <a href={`/map?store=${encodeURIComponent(store.name)}`} class="view-on-map">
+                    🗺️ Focus on Map
+                  </a>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${store.latitude},${store.longitude}`}
+                    target="_blank" 
+                    rel="noopener"
+                    class="external-map">
+                    📱 Open in Google Maps
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Footer Info -->
+  <div class="accessibility-footer">
+    <h3>♿ Accessibility Features</h3>
+    <ul>
+      <li>✅ Works without JavaScript</li>
+      <li>✅ Screen reader compatible</li>
+      <li>✅ Keyboard navigation friendly</li>
+      <li>✅ Mobile device optimized</li>
+      <li>✅ Fast loading on slow connections</li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .no-js-map-solution {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .map-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+  }
+
+  .map-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.5rem;
+  }
+
+  .target-info {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    background: rgba(255,255,255,0.2);
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .accessibility-note {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 10px 0 0 0;
+  }
+
+  .static-map-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+
+  .static-map-section h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+  }
+
+  .map-container {
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .map-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .target-details {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border-left: 4px solid #2196f3;
+  }
+
+  .store-directory {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+
+  .store-directory h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+  }
+
+  .province-nav {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+
+  .province-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .province-link {
+    background: #667eea;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+
+  .province-link:hover {
+    background: #5a67d8;
+  }
+
+  .province-section {
+    margin-bottom: 40px;
+  }
+
+  .province-title {
+    color: #667eea;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+  }
+
+  .store-card {
+    background: #f8f9fa;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .store-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  }
+
+  .store-card.highlighted {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  }
+
+  .store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .store-name {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.2rem;
+  }
+
+  .current-marker {
+    background: #f59e0b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .store-details p {
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  .address {
+    color: #4b5563;
+  }
+
+  .phone a, .website a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .phone a:hover, .website a:hover {
+    text-decoration: underline;
+  }
+
+  .coordinates {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-family: monospace;
+  }
+
+  .map-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  .view-on-map, .external-map {
+    background: #667eea;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+  }
+
+  .external-map {
+    background: #10b981;
+  }
+
+  .view-on-map:hover {
+    background: #5a67d8;
+  }
+
+  .external-map:hover {
+    background: #059669;
+  }
+
+  .accessibility-footer {
+    background: #1f2937;
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .accessibility-footer h3 {
+    margin-top: 0;
+    color: #f3f4f6;
+  }
+
+  .accessibility-footer ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 15px 0 0 0;
+  }
+
+  .accessibility-footer li {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .no-js-map-solution {
+      padding: 15px;
+    }
+
+    .map-header h1 {
+      font-size: 2rem;
+    }
+
+    .stores-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .province-links {
+      flex-direction: column;
+    }
+
+    .map-actions {
+      flex-direction: column;
+    }
+
+    .accessibility-footer ul {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style> 

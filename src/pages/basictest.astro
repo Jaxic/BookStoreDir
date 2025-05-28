@@ -1,0 +1,94 @@
+---
+// Most basic JavaScript test possible
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .success { border-color: green; background: #f0fff0; }
+        .error { border-color: red; background: #fff0f0; }
+    </style>
+</head>
+<body>
+    <h1>🔬 Ultra Basic Test</h1>
+    
+    <div class="box">
+        <h3>Test: Page Loaded</h3>
+        <p>✅ HTML and CSS are working</p>
+    </div>
+    
+    <div id="js-test" class="box">
+        <h3>Test: JavaScript Execution</h3>
+        <p id="js-result">❌ JavaScript NOT executed</p>
+    </div>
+    
+    <div id="dom-test" class="box">
+        <h3>Test: DOM Access</h3>
+        <p id="dom-result">❌ DOM access failed</p>
+    </div>
+    
+    <div class="box">
+        <h3>Manual Test: Click Button</h3>
+        <button onclick="buttonClicked()" style="padding: 10px; font-size: 16px;">Click Me!</button>
+        <p id="click-result">⏳ Waiting for click...</p>
+    </div>
+    
+    <div class="box">
+        <h3>🐛 Debug Info</h3>
+        <p><strong>Time loaded:</strong> <span id="load-time">Unknown</span></p>
+        <p><strong>User Agent:</strong> <span id="user-agent">Unknown</span></p>
+        <p><strong>Screen:</strong> <span id="screen-info">Unknown</span></p>
+    </div>
+
+    <!-- Inline script - most basic possible -->
+    <script>
+        // Test 1: Basic execution
+        document.getElementById('js-result').textContent = '✅ JavaScript IS working!';
+        document.getElementById('js-test').className = 'box success';
+        
+        // Test 2: DOM manipulation
+        try {
+            document.getElementById('dom-result').textContent = '✅ DOM access works!';
+            document.getElementById('dom-test').className = 'box success';
+        } catch (e) {
+            document.getElementById('dom-result').textContent = '❌ DOM error: ' + e.message;
+            document.getElementById('dom-test').className = 'box error';
+        }
+        
+        // Test 3: Fill debug info
+        try {
+            document.getElementById('load-time').textContent = new Date().toLocaleString();
+            document.getElementById('user-agent').textContent = navigator.userAgent.substring(0, 50) + '...';
+            document.getElementById('screen-info').textContent = window.innerWidth + 'x' + window.innerHeight;
+        } catch (e) {
+            document.getElementById('load-time').textContent = 'Error: ' + e.message;
+        }
+        
+        // Test 4: Button click function
+        function buttonClicked() {
+            document.getElementById('click-result').textContent = '✅ Button click works!';
+        }
+        
+        // Console logging
+        console.log('🔬 Basic test script executed successfully');
+        console.log('🔬 User Agent:', navigator.userAgent);
+        console.log('🔬 Screen:', window.innerWidth + 'x' + window.innerHeight);
+    </script>
+</body>
+</html> 
