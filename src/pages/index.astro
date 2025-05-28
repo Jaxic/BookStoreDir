@@ -54,12 +54,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div class="text-center">
           <!-- Logo/Brand -->
-          <div class="flex justify-center items-center mb-6">
-            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-full p-4">
-              <svg class="w-12 h-12 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-              </svg>
-            </div>
+          <div class="flex justify-center items-center mb-4">
+            <img src="/images/logo.png" alt="Born Again Books logo" style="width: 250px; height: 250px; object-fit: contain;" />
           </div>
           
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
@@ -93,9 +89,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
               href="/stores" 
               class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
             >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-              </svg>
+              <img src="/images/logo.png" alt="Born Again Books logo" class="w-5 h-5 mr-2" />
               Browse All Stores
             </a>
           </div>
@@ -124,10 +118,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Feature 1 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
+              <div class="flex justify-center items-center mb-4">
+                <img src="/images/logo.png" alt="Born Again Books logo" class="w-20 h-20 object-contain" />
               </div>
               <h3 class="text-xl font-semibold text-text mb-2">Support Local Community</h3>
               <p class="text-text">
@@ -137,10 +129,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
             
             <!-- Feature 2 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                </svg>
+              <div class="flex justify-center items-center mb-4">
+                <img src="/images/logo.png" alt="Born Again Books logo" class="w-20 h-20 object-contain" />
               </div>
               <h3 class="text-xl font-semibold text-text mb-2">Curated Selections</h3>
               <p class="text-text">
@@ -150,10 +140,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
             
             <!-- Feature 3 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
+              <div class="flex justify-center items-center mb-4">
+                <img src="/images/logo.png" alt="Born Again Books logo" class="w-20 h-20 object-contain" />
               </div>
               <h3 class="text-xl font-semibold text-text mb-2">Community Events</h3>
               <p class="text-text">
@@ -176,9 +164,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
               href="/stores" 
               class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
             >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-              </svg>
+              <img src="/images/logo.png" alt="Born Again Books logo" class="w-5 h-5 mr-2" />
               Find Stores Near Me
             </a>
           </div>
@@ -192,10 +178,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <!-- Brand -->
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center mb-4">
-              <svg class="w-8 h-8 text-accent mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-              </svg>
-              <h3 class="text-xl font-bold">BookDir</h3>
+              <img src="/images/logo.png" alt="Born Again Books logo" class="w-8 h-8 object-contain mr-3" />
+              <h3 class="text-xl font-bold">Born Again Books</h3>
             </div>
             <p class="text-secondary mb-4 max-w-md">
               Connecting book lovers with used bookstores across Canada. Supporting local businesses and fostering literary communities.
@@ -223,7 +207,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
         
         <div class="border-t border-accent mt-8 pt-8 text-center">
           <p class="text-secondary">
-            © {new Date().getFullYear()} BookDir. All rights reserved.
+            © {new Date().getFullYear()} Born Again Books. All rights reserved.
           </p>
           <p class="text-secondary text-sm mt-2">
             Supporting used bookstores and book lovers across Canada
