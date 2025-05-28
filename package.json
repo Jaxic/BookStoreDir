@@ -58,10 +58,8 @@
     "cdn:help": "tsx scripts/cdn-config.ts help",
     "cdn:deploy": "bash config/cdn/deploy.sh",
     "cdn:test": "bash config/cdn/test-performance.sh",
-    
     "images:optimize": "tsx scripts/image-optimizer.ts optimize",
     "images:help": "tsx scripts/image-optimizer.ts help",
-    
     "code-split:analyze": "tsx scripts/code-splitting-analyzer.ts analyze",
     "code-split:help": "tsx scripts/code-splitting-analyzer.ts help"
   },
@@ -96,6 +94,7 @@
   },
   "devDependencies": {
     "@astrojs/sitemap": "^3.4.0",
+    "@semantic-release/changelog": "^6.0.3",
     "@types/node": "^22.15.23",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",

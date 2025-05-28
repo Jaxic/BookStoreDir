@@ -1,0 +1,57 @@
+---
+import Navigation from '../components/Navigation.astro';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About - Born Again Books</title>
+    <meta name="description" content="Learn more about Born Again Books, our mission, and our commitment to supporting independent bookstores across Canada." />
+  </head>
+  <body class="bg-background min-h-screen font-['Inter']">
+    <Navigation currentPage="about" />
+    <header class="bg-gradient-to-r from-primary to-accent" role="banner">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div class="text-center">
+          <div class="flex justify-center items-center mb-4">
+            <img src="/images/logo.png" alt="Born Again Books logo" style="width: 200px; height: 200px; object-fit: contain;" />
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
+            About <span class="block text-text">Born Again Books</span>
+          </h1>
+          <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
+            Born Again Books is dedicated to connecting book lovers with independent, used bookstores across Canada. Our mission is to support local businesses, foster literary communities, and make it easy for readers to discover hidden gems from coast to coast.
+          </p>
+        </div>
+      </div>
+      <div class="relative">
+        <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+          <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
+        </svg>
+      </div>
+    </header>
+    <main class="bg-secondary py-16">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section class="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <h2 class="text-2xl font-bold text-text mb-4">Our Story</h2>
+          <p class="text-text mb-4">
+            Born Again Books began with a simple idea: to make it easier for readers to find and support independent bookstores in their communities. We believe that used bookstores are more than just places to buy books—they are cultural hubs, gathering spaces, and guardians of literary heritage.
+          </p>
+          <p class="text-text mb-4">
+            Our directory brings together hundreds of bookstores from every province and territory, providing detailed information, search and filter tools, and a platform for discovery. Whether you're searching for a rare edition, a cozy reading nook, or a new favorite shop, Born Again Books is here to help you on your literary journey.
+          </p>
+        </section>
+        <section class="bg-white rounded-lg shadow-lg p-8">
+          <h2 class="text-2xl font-bold text-text mb-4">Our Mission & Values</h2>
+          <ul class="list-disc pl-6 text-text space-y-2">
+            <li><strong>Support Local:</strong> We champion independent bookstores and the communities they serve.</li>
+            <li><strong>Promote Sustainability:</strong> We encourage the reuse and sharing of books, reducing waste and environmental impact.</li>
+            <li><strong>Foster Discovery:</strong> We help readers uncover unique stories, authors, and experiences.</li>
+            <li><strong>Build Community:</strong> We believe bookstores are vital spaces for connection, creativity, and lifelong learning.</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+  </body>
+</html> 
