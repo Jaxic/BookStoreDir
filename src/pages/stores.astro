@@ -16,43 +16,43 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <Layout title="Browse All Used Bookstores - BookDir Canada">
-  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white" role="banner">
+  <header class="bg-gradient-to-r from-primary to-accent" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
       <div class="text-center">
         <!-- Logo/Brand -->
         <div class="flex justify-center items-center mb-6">
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4">
-            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-full p-4">
+            <svg class="w-12 h-12 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
           </div>
         </div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-          Browse All <span class="block text-yellow-300">Used Bookstores</span>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
+          Browse All <span class="block text-text">Used Bookstores</span>
         </h1>
-        <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+        <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
           Discover {sortedStores.length} used bookstores across Canada. Filter by province, city, or search by name to find your next read.
         </p>
         <!-- Quick Stats -->
         <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{sortedStores.length}</div>
-            <div class="text-sm text-blue-100">Bookstores</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">{sortedStores.length}</div>
+            <div class="text-sm text-text">Bookstores</div>
           </div>
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">13</div>
-            <div class="text-sm text-blue-100">Provinces & Territories</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">13</div>
+            <div class="text-sm text-text">Provinces & Territories</div>
           </div>
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">100%</div>
-            <div class="text-sm text-blue-100">Used</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">100%</div>
+            <div class="text-sm text-text">Used</div>
           </div>
         </div>
         <!-- Action Button -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <a 
             href="/stores" 
-            class="inline-flex items-center px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
+            class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -64,7 +64,7 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
     </div>
     <!-- Decorative wave -->
     <div class="relative">
-      <svg class="absolute bottom-0 w-full h-6 text-gray-50" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+      <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
         <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
       </svg>
     </div>
@@ -129,83 +129,86 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
                 data-province={store.province?.toLowerCase() || ''}
                 data-city={store.city?.toLowerCase() || ''}
               >
-                <div class="flex-1">
-                  <div class="flex items-start justify-between mb-4">
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-gray-900 mb-1">{store.name}</h3>
-                      <p class="text-sm text-gray-600">
-                        {store.city && store.province ? `${store.city}, ${store.province}` : store.formattedAddress}
-                      </p>
-                    </div>
-                    {store.ratingInfo && (
-                      <div class="flex items-center ml-4">
-                        <span class="text-yellow-400 text-sm">⭐</span>
-                        <span class="text-sm font-medium text-gray-700 ml-1">
-                          {store.ratingInfo.rating}/5
-                        </span>
-                        <span class="text-xs text-gray-500 ml-1">
-                          ({store.ratingInfo.numReviews})
-                        </span>
+                <div class="flex flex-col h-full">
+                  <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                          <h3 class="text-lg font-semibold text-text mb-1">{store.name}</h3>
+                          <p class="text-sm text-text">
+                            {store.city && store.province ? `${store.city}, ${store.province}` : store.formattedAddress}
+                          </p>
+                        </div>
+                        {store.ratingInfo && (
+                          <div class="flex items-center ml-4">
+                            <span class="text-accent text-sm">⭐</span>
+                            <span class="text-sm font-medium text-text ml-1">
+                              {store.ratingInfo.rating}/5
+                            </span>
+                            <span class="text-xs text-secondary ml-1">
+                              ({store.ratingInfo.numReviews})
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div class="space-y-2 mb-4">
+                        <div class="flex items-start">
+                          <svg class="w-4 h-4 text-secondary mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                          <p class="text-sm text-text">{store.formattedAddress}</p>
+                        </div>
+                        {store.phone && (
+                          <div class="flex items-center">
+                            <svg class="w-4 h-4 text-secondary mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <a href={`tel:${store.phone}`} class="text-sm text-accent hover:text-primary transition-colors">
+                              {store.phone}
+                            </a>
+                          </div>
+                        )}
+                        {store.website && (
+                          <div class="flex items-center">
+                            <svg class="w-4 h-4 text-secondary mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                            </svg>
+                            <a href={store.website} target="_blank" rel="noopener noreferrer" class="text-sm text-accent hover:text-primary transition-colors">
+                              Visit website
+                            </a>
+                          </div>
+                        )}
+                        {store.description && (
+                          <div class="mt-3">
+                            <p class="text-sm text-text line-clamp-2">{store.description}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div class="space-y-2 mb-4">
-                    <div class="flex items-start">
-                      <svg class="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex gap-2 mt-4">
+                    <a
+                      href={`/stores/${storeSlug}`}
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-accent hover:bg-primary text-secondary font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                    >
+                      View Details
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.formattedAddress)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-primary hover:bg-accent text-secondary font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
+                      aria-label={`Get directions to ${store.name}, ${store.formattedAddress}`}
+                      title={`Get directions to ${store.name}, ${store.formattedAddress}`}
+                    >
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       </svg>
-                      <p class="text-sm text-gray-600">{store.formattedAddress}</p>
-                    </div>
-                    {store.phone && (
-                      <div class="flex items-center">
-                        <svg class="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        <a href={`tel:${store.phone}`} class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                          {store.phone}
-                        </a>
-                      </div>
-                    )}
-                    {store.website && (
-                      <div class="flex items-center">
-                        <svg class="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-                        </svg>
-                        <a href={store.website} target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                          Visit website
-                        </a>
-                      </div>
-                    )}
-                    {store.description && (
-                      <div class="mt-3">
-                        <p class="text-sm text-gray-600 line-clamp-2">{store.description}</p>
-                      </div>
-                    )}
+                      Directions
+                    </a>
                   </div>
-                </div>
-                <div class="flex gap-2 mt-auto pt-4">
-                  <a
-                    href={`/stores/${storeSlug}`}
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                  >
-                    View Details
-                  </a>
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.formattedAddress)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 whitespace-nowrap"
-                    style="min-width: 120px;"
-                    aria-label={`Get directions to ${store.name}, ${store.formattedAddress}`}
-                    title={`Get directions to ${store.name}, ${store.formattedAddress}`}
-                  >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Directions
-                  </a>
                 </div>
               </div>
             );

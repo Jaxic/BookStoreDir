@@ -110,43 +110,43 @@ let showOtherCities = false;
   })} />
 
   <!-- Province Hero Section (Homepage Style) -->
-  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white" role="banner">
+  <header class="bg-gradient-to-r from-primary to-accent" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
       <div class="text-center">
         <!-- Logo/Brand -->
         <div class="flex justify-center items-center mb-6">
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4">
-            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-full p-4">
+            <svg class="w-12 h-12 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
           </div>
         </div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-          Discover {province.name} <span class="block text-yellow-300">Used Bookstores</span>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
+          Discover {province.name} <span class="block text-text">Used Bookstores</span>
         </h1>
-        <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+        <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
           Explore {province.totalStores} used bookstores across {province.cities.length} cities in {province.name}. Find your next read and support local shops.
         </p>
         <!-- Quick Stats -->
         <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{province.totalStores}</div>
-            <div class="text-sm text-blue-100">Bookstores</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">{province.totalStores}</div>
+            <div class="text-sm text-text">Bookstores</div>
           </div>
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{province.cities.length}</div>
-            <div class="text-sm text-blue-100">Cities</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">{province.cities.length}</div>
+            <div class="text-sm text-text">Cities</div>
           </div>
-          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{topCities[0]?.name || '—'}</div>
-            <div class="text-sm text-blue-100">Top City</div>
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">{topCities[0]?.name || '—'}</div>
+            <div class="text-sm text-text">Top City</div>
           </div>
         </div>
         <!-- Action Button -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <a 
             href="/stores" 
-            class="inline-flex items-center px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
+            class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -158,7 +158,7 @@ let showOtherCities = false;
     </div>
     <!-- Decorative wave -->
     <div class="relative">
-      <svg class="absolute bottom-0 w-full h-6 text-gray-50" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+      <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
         <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
       </svg>
     </div>

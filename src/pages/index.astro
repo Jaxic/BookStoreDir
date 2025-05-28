@@ -37,11 +37,11 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
     
     <!-- Tailwind CSS is handled by Astro integration, no CDN needed -->
   </head>
-  <body class="bg-gray-50 min-h-screen font-['Inter']">
+  <body class="bg-background min-h-screen font-['Inter']">
     <!-- Skip to main content link -->
     <a 
       href="#main-content" 
-      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-secondary px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
     >
       Skip to main content
     </a>
@@ -50,40 +50,40 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
     <Navigation currentPage="home" />
 
     <!-- Hero Section -->
-    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white" role="banner">
+    <header class="bg-gradient-to-r from-primary to-accent" role="banner">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div class="text-center">
           <!-- Logo/Brand -->
           <div class="flex justify-center items-center mb-6">
-            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4">
-              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-full p-4">
+              <svg class="w-12 h-12 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
               </svg>
             </div>
           </div>
           
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
             Discover Canada's 
-            <span class="block text-yellow-300">Used Bookstores</span>
+            <span class="block text-text">Used Bookstores</span>
           </h1>
           
-          <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
             Explore {processedStores.length} unique bookstores across Canada. Find local gems, support independent businesses, and discover your next reading adventure.
           </p>
           
           <!-- Quick Stats -->
           <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-              <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{processedStores.length}</div>
-              <div class="text-sm text-blue-100">Bookstores</div>
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+              <div class="text-2xl sm:text-3xl font-bold text-text">{processedStores.length}</div>
+              <div class="text-sm text-text">Bookstores</div>
             </div>
-            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-              <div class="text-2xl sm:text-3xl font-bold text-yellow-300">13</div>
-              <div class="text-sm text-blue-100">Provinces & Territories</div>
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+              <div class="text-2xl sm:text-3xl font-bold text-text">13</div>
+              <div class="text-sm text-text">Provinces & Territories</div>
             </div>
-            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-              <div class="text-2xl sm:text-3xl font-bold text-yellow-300">100%</div>
-              <div class="text-sm text-blue-100">Used</div>
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+              <div class="text-2xl sm:text-3xl font-bold text-text">100%</div>
+              <div class="text-sm text-text">Used</div>
             </div>
           </div>
           
@@ -91,7 +91,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a 
               href="/stores" 
-              class="inline-flex items-center px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
+              class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
             >
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -104,7 +104,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       
       <!-- Decorative wave -->
       <div class="relative">
-        <svg class="absolute bottom-0 w-full h-6 text-gray-50" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+        <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
           <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
         </svg>
       </div>
@@ -112,11 +112,11 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
 
     <main id="main-content">
       <!-- Features Section -->
-      <section class="py-16 bg-white">
+      <section class="py-16 bg-secondary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose Used Bookstores?</h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 class="text-3xl font-bold text-text mb-4">Why Choose Used Bookstores?</h2>
+            <p class="text-lg text-text max-w-2xl mx-auto">
               Used bookstores offer unique experiences that support local communities and foster literary culture.
             </p>
           </div>
@@ -124,39 +124,39 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Feature 1 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
               </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Support Local Community</h3>
-              <p class="text-gray-600">
+              <h3 class="text-xl font-semibold text-text mb-2">Support Local Community</h3>
+              <p class="text-text">
                 Every purchase helps support local jobs, community events, and the unique character of your neighborhood.
               </p>
             </div>
             
             <!-- Feature 2 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-16 h-16 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
               </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Curated Selections</h3>
-              <p class="text-gray-600">
+              <h3 class="text-xl font-semibold text-text mb-2">Curated Selections</h3>
+              <p class="text-text">
                 Discover hand-picked books, hidden gems, and personalized recommendations from passionate booksellers.
               </p>
             </div>
             
             <!-- Feature 3 -->
             <div class="text-center p-6">
-              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
               </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Community Events</h3>
-              <p class="text-gray-600">
+              <h3 class="text-xl font-semibold text-text mb-2">Community Events</h3>
+              <p class="text-text">
                 Enjoy author readings, book clubs, literary discussions, and other events that bring book lovers together.
               </p>
             </div>
@@ -165,16 +165,16 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       </section>
 
       <!-- Call to Action -->
-      <section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+      <section class="py-16 bg-gradient-to-r from-primary to-accent text-secondary">
         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold mb-4">Start Your Bookstore Adventure Today</h2>
-          <p class="text-xl text-blue-100 mb-8">
+          <p class="text-xl text-secondary mb-8">
             Find your perfect reading spot, discover new authors, and support the literary community in your area.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
               href="/stores" 
-              class="inline-flex items-center px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
+              class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
             >
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -186,18 +186,18 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       </section>
     </main>
 
-    <footer class="bg-gray-900 text-white" role="contentinfo">
+    <footer class="bg-primary text-secondary" role="contentinfo">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <!-- Brand -->
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center mb-4">
-              <svg class="w-8 h-8 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-8 h-8 text-accent mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
               </svg>
               <h3 class="text-xl font-bold">BookDir</h3>
             </div>
-            <p class="text-gray-300 mb-4 max-w-md">
+            <p class="text-secondary mb-4 max-w-md">
               Connecting book lovers with used bookstores across Canada. Supporting local businesses and fostering literary communities.
             </p>
           </div>
@@ -206,8 +206,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <div>
             <h4 class="text-lg font-semibold mb-4">Explore</h4>
             <ul class="space-y-2">
-              <li><a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
-              <li><a href="/stores" class="text-gray-300 hover:text-white transition-colors">Browse Stores</a></li>
+              <li><a href="/" class="text-secondary hover:text-background transition-colors">Home</a></li>
+              <li><a href="/stores" class="text-secondary hover:text-background transition-colors">Browse Stores</a></li>
             </ul>
           </div>
           
@@ -215,17 +215,17 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           <div>
             <h4 class="text-lg font-semibold mb-4">Connect</h4>
             <ul class="space-y-2">
-              <li><a href="mailto:hello@bookdir.ca" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="/about" class="text-gray-300 hover:text-white transition-colors">About</a></li>
+              <li><a href="mailto:hello@bookdir.ca" class="text-secondary hover:text-background transition-colors">Contact Us</a></li>
+              <li><a href="/about" class="text-secondary hover:text-background transition-colors">About</a></li>
             </ul>
           </div>
         </div>
         
-        <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p class="text-gray-400">
+        <div class="border-t border-accent mt-8 pt-8 text-center">
+          <p class="text-secondary">
             © {new Date().getFullYear()} BookDir. All rights reserved.
           </p>
-          <p class="text-gray-500 text-sm mt-2">
+          <p class="text-secondary text-sm mt-2">
             Supporting used bookstores and book lovers across Canada
           </p>
         </div>

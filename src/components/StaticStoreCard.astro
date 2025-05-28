@@ -27,7 +27,7 @@ const getStoreImage = (photoUrl: string, storeName: string) => {
 const storeImage = getStoreImage(store.photos_url, store.name);
 ---
 
-<div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group">
+<div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group flex flex-col h-full">
   <!-- Image Section -->
   <div class="relative h-48 overflow-hidden">
     <img
@@ -39,7 +39,7 @@ const storeImage = getStoreImage(store.photos_url, store.name);
   </div>
 
   <!-- Content Section -->
-  <div class="p-4">
+  <div class="flex-1 flex flex-col p-4">
     <!-- Store Name -->
     <h3 class="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
       {store.name}
@@ -86,38 +86,43 @@ const storeImage = getStoreImage(store.photos_url, store.name);
         )}
       </div>
     )}
-
+    <!-- Spacer to push buttons to bottom -->
+    <div class="flex-1"></div>
     <!-- Action Buttons -->
-    <div class="flex flex-wrap gap-2 mb-3">
+    <div class="flex gap-2 mt-4">
       <a
         href={storeUrl}
-        class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-accent hover:bg-primary text-secondary font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
       >
         View Details
       </a>
-      {store.website && (
+      {store.website ? (
         <a
           href={store.website}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+          class="flex-1 inline-flex items-center justify-center gap-1 px-4 py-2 bg-primary hover:bg-accent text-secondary font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>
           Website
         </a>
+      ) : (
+        <span class="flex-1"></span>
       )}
-      {store.phone && (
+      {store.phone ? (
         <a
           href={`tel:${store.phone}`}
-          class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-lg hover:bg-green-200 transition-colors"
+          class="flex-1 inline-flex items-center justify-center gap-1 px-4 py-2 bg-secondary hover:bg-accent text-text font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
         >
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
           Call
         </a>
+      ) : (
+        <span class="flex-1"></span>
       )}
     </div>
   </div>
