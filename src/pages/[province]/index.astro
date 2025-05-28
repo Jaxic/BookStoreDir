@@ -43,6 +43,8 @@ const canonicalUrl = `${Astro.site}${params.province}/`;
 // Sort cities by store count for better display
 const topCities = province.cities.slice(0, 10);
 const otherCities = province.cities.slice(10);
+
+let showOtherCities = false;
 ---
 
 <Layout 
@@ -107,6 +109,62 @@ const otherCities = province.cities.slice(10);
     ]
   })} />
 
+  <!-- Province Hero Section (Homepage Style) -->
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white" role="banner">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="text-center">
+        <!-- Logo/Brand -->
+        <div class="flex justify-center items-center mb-6">
+          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+          Discover {province.name} <span class="block text-yellow-300">Used Bookstores</span>
+        </h1>
+        <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+          Explore {province.totalStores} used bookstores across {province.cities.length} cities in {province.name}. Find your next read and support local shops.
+        </p>
+        <!-- Quick Stats -->
+        <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
+          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{province.totalStores}</div>
+            <div class="text-sm text-blue-100">Bookstores</div>
+          </div>
+          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{province.cities.length}</div>
+            <div class="text-sm text-blue-100">Cities</div>
+          </div>
+          <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-yellow-300">{topCities[0]?.name || '—'}</div>
+            <div class="text-sm text-blue-100">Top City</div>
+          </div>
+        </div>
+        <!-- Action Button -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a 
+            href="/stores" 
+            class="inline-flex items-center px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            Browse All Stores
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Decorative wave -->
+    <div class="relative">
+      <svg class="absolute bottom-0 w-full h-6 text-gray-50" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+        <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
+      </svg>
+    </div>
+  </header>
+
+  <!-- Breadcrumb Navigation and Main Content -->
   <main class="container mx-auto px-4 py-8">
     <!-- Breadcrumb Navigation -->
     <nav class="flex mb-6 text-sm text-gray-600" aria-label="Breadcrumb">
@@ -122,40 +180,6 @@ const otherCities = province.cities.slice(10);
         </li>
       </ol>
     </nav>
-
-    <!-- Province Header -->
-    <header class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <h1 class="text-3xl font-bold text-gray-900">
-          Bookstores in {province.name}
-        </h1>
-        <div class="text-right">
-          <div class="text-2xl font-bold text-blue-600">{province.totalStores}</div>
-          <div class="text-sm text-gray-600">Total Stores</div>
-        </div>
-      </div>
-      <p class="text-lg text-gray-600 max-w-3xl">
-        Explore {province.totalStores} unique used and rare bookstores across {province.cities.length} cities in {province.name}. 
-        From bustling urban centers to charming small towns, discover literary treasures waiting to be found.
-      </p>
-    </header>
-
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-blue-50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-blue-900 mb-2">Total Bookstores</h3>
-        <p class="text-3xl font-bold text-blue-600">{province.totalStores}</p>
-      </div>
-      <div class="bg-green-50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-green-900 mb-2">Cities Covered</h3>
-        <p class="text-3xl font-bold text-green-600">{province.cities.length}</p>
-      </div>
-      <div class="bg-purple-50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-purple-900 mb-2">Top City</h3>
-        <p class="text-xl font-bold text-purple-600">{topCities[0]?.name}</p>
-        <p class="text-sm text-purple-700">{topCities[0]?.storeCount} stores</p>
-      </div>
-    </div>
 
     <!-- Browse by City -->
     <section class="mb-12">
@@ -185,7 +209,16 @@ const otherCities = province.cities.slice(10);
       {otherCities.length > 0 && (
         <div>
           <h3 class="text-xl font-semibold text-gray-800 mb-4">Other Cities</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <button
+            id="toggle-other-cities"
+            type="button"
+            class="mb-4 px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-expanded="false"
+            aria-controls="other-cities-list"
+          >
+            Show Other Cities
+          </button>
+          <div id="other-cities-list" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {otherCities.map((city: CityInfo) => (
               <a 
                 href={`/${params.province}/${city.slug}/`}
@@ -198,6 +231,17 @@ const otherCities = province.cities.slice(10);
               </a>
             ))}
           </div>
+          <script>
+            const btn = document.getElementById('toggle-other-cities');
+            const list = document.getElementById('other-cities-list');
+            if (btn && list) {
+              btn.addEventListener('click', () => {
+                const isOpen = list.classList.toggle('hidden') === false;
+                btn.setAttribute('aria-expanded', isOpen);
+                btn.textContent = isOpen ? 'Hide Other Cities' : 'Show Other Cities';
+              });
+            }
+          </script>
         </div>
       )}
     </section>
