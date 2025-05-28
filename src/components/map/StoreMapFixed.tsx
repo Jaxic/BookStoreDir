@@ -258,8 +258,34 @@ export default function StoreMapFixed({
           const lng = parseFloat(targetStore.lng);
           console.log(`🧪 Zooming to target store: ${targetStore.name} at [${lat}, ${lng}]`);
           map.setView([lat, lng], 15, { animate: true, duration: 1.0 });
+          
+          // Verify the zoom worked
+          setTimeout(() => {
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            console.log(`🧪 Test result - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
+          }, 1500);
         } else {
           console.log(`❌ No target store or map available`);
+        }
+      };
+      
+      // Add function to test with first store
+      (globalThis as any).testFirstStore = () => {
+        if (validStores.length > 0 && map) {
+          const firstStore = validStores[0];
+          const lat = parseFloat(firstStore.lat);
+          const lng = parseFloat(firstStore.lng);
+          console.log(`🧪 Testing with first store: ${firstStore.name} at [${lat}, ${lng}]`);
+          map.setView([lat, lng], 15, { animate: true, duration: 1.0 });
+          
+          setTimeout(() => {
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            console.log(`🧪 First store test result - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
+          }, 1500);
+        } else {
+          console.log(`❌ No stores or map available`);
         }
       };
 
@@ -285,79 +311,112 @@ export default function StoreMapFixed({
       return;
     }
 
-    if (targetStore) {
-      const targetLat = parseFloat(targetStore.lat);
-      const targetLng = parseFloat(targetStore.lng);
-      
-      console.log(`🎯 Target store: ${targetStore.name}`);
-      console.log(`🎯 Coordinates: lat=${targetLat}, lng=${targetLng}`);
-      
-      if (!isNaN(targetLat) && !isNaN(targetLng)) {
-        console.log(`🎯 EXECUTING setView to [${targetLat}, ${targetLng}] with zoom 15`);
+    // Add a small delay to ensure map is fully rendered
+    const timer = setTimeout(() => {
+      if (targetStore) {
+        const targetLat = parseFloat(targetStore.lat);
+        const targetLng = parseFloat(targetStore.lng);
         
-        // Use setView to focus on the target store - this should work according to Context7 docs
-        mapInstance.current.setView([targetLat, targetLng], 15, {
-          animate: true,
-          duration: 1.5
-        });
+        console.log(`🎯 Target store: ${targetStore.name}`);
+        console.log(`🎯 Coordinates: lat=${targetLat}, lng=${targetLng}`);
         
-        // Find and open the popup for the target store
-        setTimeout(() => {
+        if (!isNaN(targetLat) && !isNaN(targetLng)) {
+          console.log(`🎯 EXECUTING setView to [${targetLat}, ${targetLng}] with zoom 15`);
+          
+          // Use setView to focus on the target store - based on Context7 docs
           if (mapInstance.current) {
-            console.log(`🔍 Looking for marker to open popup...`);
-            mapInstance.current.eachLayer((layer: any) => {
-              if (layer instanceof L.Marker) {
-                const markerLatLng = layer.getLatLng();
-                const latDiff = Math.abs(markerLatLng.lat - targetLat);
-                const lngDiff = Math.abs(markerLatLng.lng - targetLng);
-                console.log(`📍 Checking marker at ${markerLatLng.lat}, ${markerLatLng.lng} - diff: lat=${latDiff}, lng=${lngDiff}`);
-                if (latDiff < 0.0001 && lngDiff < 0.0001) {
-                  console.log(`✅ Found matching marker, opening popup`);
-                  layer.openPopup();
-                }
-              }
+            mapInstance.current.setView([targetLat, targetLng], 15, {
+              animate: true,
+              duration: 1.5
             });
+            
+            console.log(`✅ setView command executed`);
+            
+            // Verify the view was set correctly
+            setTimeout(() => {
+              if (mapInstance.current) {
+                const center = mapInstance.current.getCenter();
+                const zoom = mapInstance.current.getZoom();
+                console.log(`📍 Verification - Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
+              }
+            }, 2000);
+            
+            // Find and open the popup for the target store
+            setTimeout(() => {
+              if (mapInstance.current) {
+                console.log(`🔍 Looking for marker to open popup...`);
+                mapInstance.current.eachLayer((layer: any) => {
+                  if (layer instanceof L.Marker) {
+                    const markerLatLng = layer.getLatLng();
+                    const latDiff = Math.abs(markerLatLng.lat - targetLat);
+                    const lngDiff = Math.abs(markerLatLng.lng - targetLng);
+                    console.log(`📍 Checking marker at ${markerLatLng.lat}, ${markerLatLng.lng} - diff: lat=${latDiff}, lng=${lngDiff}`);
+                    if (latDiff < 0.0001 && lngDiff < 0.0001) {
+                      console.log(`✅ Found matching marker, opening popup`);
+                      layer.openPopup();
+                    }
+                  }
+                });
+              }
+            }, 2500);
           }
-        }, 2000);
-        
-        return; // Exit early when we have a target store
-      } else {
-        console.log(`❌ Invalid coordinates: lat=${targetLat}, lng=${targetLng}`);
+          
+          return; // Exit early when we have a target store - DON'T run fitBounds
+        } else {
+          console.log(`❌ Invalid coordinates: lat=${targetLat}, lng=${targetLng}`);
+        }
       }
+    }, 100); // Small delay to ensure map is fully ready
+
+    return () => clearTimeout(timer);
+  }, [mapReady, targetStore]);
+
+  // Separate effect for fitting bounds when NO target store is specified
+  useEffect(() => {
+    console.log(`🗺️ BOUNDS EFFECT - mapReady: ${mapReady}, targetStore: ${!!targetStore}, validStores: ${validStores.length}`);
+    
+    // Only run this effect if there's NO target store
+    if (!mapInstance.current || !mapReady || targetStore || validStores.length === 0) {
+      console.log(`❌ Bounds effect skipped - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}, hasTargetStore: ${!!targetStore}, validStores: ${validStores.length}`);
+      return;
     }
 
     // Default behavior: fit to all stores when no target store
     console.log(`ℹ️ No target store, fitting to all ${validStores.length} stores`);
-    if (validStores.length === 0) return;
 
-    try {
-      let bounds: L.LatLngBounds | null = null;
-      
-      validStores.forEach(store => {
-        const lat = parseFloat(store.lat);
-        const lng = parseFloat(store.lng);
+    const timer = setTimeout(() => {
+      try {
+        let bounds: L.LatLngBounds | null = null;
         
-        if (!bounds) {
-          bounds = L.latLngBounds([lat, lng], [lat, lng]);
-        } else {
-          bounds!.extend([lat, lng]);
-        }
-      });
-
-      // Add user location to bounds if available
-      if (userLocation && bounds) {
-        (bounds as L.LatLngBounds).extend([userLocation.latitude, userLocation.longitude]);
-      }
-
-      if (bounds) {
-        mapInstance.current.fitBounds(bounds, { 
-          padding: isMobile ? [40, 40] : [20, 20],
-          maxZoom: isMobile ? 15 : 16
+        validStores.forEach(store => {
+          const lat = parseFloat(store.lat);
+          const lng = parseFloat(store.lng);
+          
+          if (!bounds) {
+            bounds = L.latLngBounds([lat, lng], [lat, lng]);
+          } else {
+            bounds!.extend([lat, lng]);
+          }
         });
+
+        // Add user location to bounds if available
+        if (userLocation && bounds) {
+          (bounds as L.LatLngBounds).extend([userLocation.latitude, userLocation.longitude]);
+        }
+
+        if (bounds && mapInstance.current) {
+          console.log(`🗺️ Fitting bounds to all stores`);
+          mapInstance.current.fitBounds(bounds, { 
+            padding: isMobile ? [40, 40] : [20, 20],
+            maxZoom: isMobile ? 15 : 16
+          });
+        }
+      } catch (error) {
+        console.error('Error fitting bounds:', error);
       }
-    } catch (error) {
-      console.error('Error fitting bounds:', error);
-    }
+    }, 200); // Slightly longer delay to ensure target store effect runs first
+
+    return () => clearTimeout(timer);
   }, [mapReady, targetStore, validStores, userLocation, isMobile]);
 
   return (
