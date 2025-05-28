@@ -152,6 +152,87 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
         </div>
       </section>
 
+      <!-- FAQ Section -->
+      <section class="py-16 bg-background">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl font-bold text-text mb-8 text-center">Frequently Asked Questions</h2>
+          <div id="faq-accordion" class="space-y-4">
+            <div class="border border-accent rounded-lg overflow-hidden shadow-lg faq-item">
+              <button type="button" class="w-full flex justify-between items-center px-6 py-5 text-left text-lg font-semibold text-text bg-white hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent border-l-4 border-accent transition-all faq-question" aria-expanded="false" aria-controls="faq1">
+                <span>Where is the cheapest place to get books?</span>
+                <span class="ml-2 transition-transform faq-arrow">&#x25BC;</span>
+              </button>
+              <div id="faq1" class="faq-panel px-6 py-4 text-text bg-gray-50 hidden">
+                Used bookstores are often the most affordable places to buy books, offering great deals on a wide variety of titles. You can also find bargains at library sales, thrift shops, and online marketplaces, but used bookstores provide curated selections and knowledgeable staff.
+              </div>
+            </div>
+            <div class="border border-accent rounded-lg overflow-hidden shadow-lg faq-item">
+              <button type="button" class="w-full flex justify-between items-center px-6 py-5 text-left text-lg font-semibold text-text bg-white hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent border-l-4 border-accent transition-all faq-question" aria-expanded="false" aria-controls="faq2">
+                <span>Are all bookstores listed independent and used?</span>
+                <span class="ml-2 transition-transform faq-arrow">&#x25BC;</span>
+              </button>
+              <div id="faq2" class="faq-panel px-6 py-4 text-text bg-gray-50 hidden">
+                Yes! We focus on independent, used bookstores across Canada to help you support local businesses and find unique selections.
+              </div>
+            </div>
+            <div class="border border-accent rounded-lg overflow-hidden shadow-lg faq-item">
+              <button type="button" class="w-full flex justify-between items-center px-6 py-5 text-left text-lg font-semibold text-text bg-white hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent border-l-4 border-accent transition-all faq-question" aria-expanded="false" aria-controls="faq3">
+                <span>Can I suggest a bookstore to add?</span>
+                <span class="ml-2 transition-transform faq-arrow">&#x25BC;</span>
+              </button>
+              <div id="faq3" class="faq-panel px-6 py-4 text-text bg-gray-50 hidden">
+                Absolutely! If you know a great used bookstore that isn't listed, please contact us and we'll review your suggestion for inclusion.
+              </div>
+            </div>
+            <div class="border border-accent rounded-lg overflow-hidden shadow-lg faq-item">
+              <button type="button" class="w-full flex justify-between items-center px-6 py-5 text-left text-lg font-semibold text-text bg-white hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent border-l-4 border-accent transition-all faq-question" aria-expanded="false" aria-controls="faq4">
+                <span>Is it worth buying second-hand books?</span>
+                <span class="ml-2 transition-transform faq-arrow">&#x25BC;</span>
+              </button>
+              <div id="faq4" class="faq-panel px-6 py-4 text-text bg-gray-50 hidden">
+                Yes! Second-hand books are often in excellent condition, cost less, and buying them is environmentally friendly. You can discover rare finds and support local businesses at the same time.
+              </div>
+            </div>
+            <div class="border border-accent rounded-lg overflow-hidden shadow-lg faq-item">
+              <button type="button" class="w-full flex justify-between items-center px-6 py-5 text-left text-lg font-semibold text-text bg-white hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-accent border-l-4 border-accent transition-all faq-question" aria-expanded="false" aria-controls="faq5">
+                <span>What makes used bookstores special?</span>
+                <span class="ml-2 transition-transform faq-arrow">&#x25BC;</span>
+              </button>
+              <div id="faq5" class="faq-panel px-6 py-4 text-text bg-gray-50 hidden">
+                Used bookstores offer curated selections, affordable prices, and a sense of discovery you won't find in big box stores. Every visit is a new adventure!
+              </div>
+            </div>
+          </div>
+        </div>
+        <style>
+          .faq-item[open], .faq-item:has([aria-expanded="true"]) {
+            background: rgba(var(--color-accent), 0.05);
+            border-color: var(--color-accent);
+          }
+          .faq-question[aria-expanded="true"] {
+            background: rgba(var(--color-accent), 0.08);
+            border-color: var(--color-accent);
+          }
+          .faq-arrow {
+            transition: transform 0.3s;
+          }
+          .faq-question[aria-expanded="true"] .faq-arrow {
+            transform: rotate(180deg);
+          }
+          .faq-panel {
+            transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            will-change: max-height, opacity;
+          }
+          .faq-panel:not(.hidden) {
+            max-height: 300px;
+            opacity: 1;
+          }
+        </style>
+      </section>
+
       <!-- Call to Action -->
       <section class="py-16 bg-gradient-to-r from-primary to-accent text-secondary">
         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -229,6 +310,22 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
                 behavior: 'smooth',
                 block: 'start'
               });
+            }
+          });
+        });
+
+        // FAQ Accordion logic
+        document.querySelectorAll('#faq-accordion button').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            // Close all
+            document.querySelectorAll('#faq-accordion button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+            document.querySelectorAll('#faq-accordion div[id^="faq"]').forEach(d => d.classList.add('hidden'));
+            // Open this one if it was closed
+            if (!expanded) {
+              this.setAttribute('aria-expanded', 'true');
+              const panel = document.getElementById(this.getAttribute('aria-controls'));
+              if (panel) panel.classList.remove('hidden');
             }
           });
         });
