@@ -205,8 +205,8 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
                       href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.formattedAddress)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
-                      style="min-width: 44px;"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 whitespace-nowrap"
+                      style="min-width: 120px;"
                       aria-label={`Get directions to ${store.name}, ${store.formattedAddress}`}
                       title={`Get directions to ${store.name}, ${store.formattedAddress}`}
                     >
