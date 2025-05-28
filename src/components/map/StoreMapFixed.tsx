@@ -8,6 +8,7 @@ interface StoreMapFixedProps {
   stores: ProcessedBookstore[];
   height?: string;
   className?: string;
+  targetStore?: ProcessedBookstore | null;
 }
 
 // Helper function to calculate distance between two points using Haversine formula
@@ -27,7 +28,8 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
 export default function StoreMapFixed({ 
   stores, 
   height = "100%",
-  className = ""
+  className = "",
+  targetStore = null
 }: StoreMapFixedProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<Map | null>(null);
@@ -212,10 +214,54 @@ export default function StoreMapFixed({
       
       console.log('✅ Leaflet map initialized successfully with mobile optimizations!');
       console.log(`📍 Added ${validStores.length} store markers`);
+      console.log(`🎯 Target store prop:`, targetStore);
 
       // Global debugging
       (globalThis as any).L = L;
       (globalThis as any).map = map;
+      
+      // Add debugging functions for testing zoom functionality
+      (globalThis as any).testZoom = (lat: number, lng: number, zoom: number = 15) => {
+        console.log(`🧪 Testing zoom to [${lat}, ${lng}] with zoom ${zoom}`);
+        if (map) {
+          map.setView([lat, lng], zoom, { animate: true, duration: 1.0 });
+          console.log(`✅ setView executed`);
+        } else {
+          console.log(`❌ Map not available`);
+        }
+      };
+      
+      (globalThis as any).testFlyTo = (lat: number, lng: number, zoom: number = 15) => {
+        console.log(`🧪 Testing flyTo [${lat}, ${lng}] with zoom ${zoom}`);
+        if (map) {
+          map.flyTo([lat, lng], zoom, { duration: 1.0 });
+          console.log(`✅ flyTo executed`);
+        } else {
+          console.log(`❌ Map not available`);
+        }
+      };
+      
+      (globalThis as any).getCurrentView = () => {
+        if (map) {
+          const center = map.getCenter();
+          const zoom = map.getZoom();
+          console.log(`📍 Current view: [${center.lat}, ${center.lng}] zoom: ${zoom}`);
+          return { center, zoom };
+        }
+      };
+      
+      // Add function to test target store zoom
+      (globalThis as any).testTargetStoreZoom = () => {
+        console.log(`🧪 Testing target store zoom with current targetStore:`, targetStore);
+        if (targetStore && map) {
+          const lat = parseFloat(targetStore.lat);
+          const lng = parseFloat(targetStore.lng);
+          console.log(`🧪 Zooming to target store: ${targetStore.name} at [${lat}, ${lng}]`);
+          map.setView([lat, lng], 15, { animate: true, duration: 1.0 });
+        } else {
+          console.log(`❌ No target store or map available`);
+        }
+      };
 
     } catch (error) {
       console.error('❌ Error initializing map:', error);
@@ -230,9 +276,59 @@ export default function StoreMapFixed({
     };
   }, [validStores, userLocation, isMobile]);
 
-  // Fit to bounds when stores change
+  // Handle target store focusing - this is the main effect for zoom functionality
   useEffect(() => {
-    if (!mapInstance.current || !mapReady || validStores.length === 0) return;
+    console.log(`🎯 TARGET STORE EFFECT - mapReady: ${mapReady}, targetStore:`, targetStore?.name || 'null');
+    
+    if (!mapInstance.current || !mapReady) {
+      console.log(`❌ Map not ready - mapInstance: ${!!mapInstance.current}, mapReady: ${mapReady}`);
+      return;
+    }
+
+    if (targetStore) {
+      const targetLat = parseFloat(targetStore.lat);
+      const targetLng = parseFloat(targetStore.lng);
+      
+      console.log(`🎯 Target store: ${targetStore.name}`);
+      console.log(`🎯 Coordinates: lat=${targetLat}, lng=${targetLng}`);
+      
+      if (!isNaN(targetLat) && !isNaN(targetLng)) {
+        console.log(`🎯 EXECUTING setView to [${targetLat}, ${targetLng}] with zoom 15`);
+        
+        // Use setView to focus on the target store - this should work according to Context7 docs
+        mapInstance.current.setView([targetLat, targetLng], 15, {
+          animate: true,
+          duration: 1.5
+        });
+        
+        // Find and open the popup for the target store
+        setTimeout(() => {
+          if (mapInstance.current) {
+            console.log(`🔍 Looking for marker to open popup...`);
+            mapInstance.current.eachLayer((layer: any) => {
+              if (layer instanceof L.Marker) {
+                const markerLatLng = layer.getLatLng();
+                const latDiff = Math.abs(markerLatLng.lat - targetLat);
+                const lngDiff = Math.abs(markerLatLng.lng - targetLng);
+                console.log(`📍 Checking marker at ${markerLatLng.lat}, ${markerLatLng.lng} - diff: lat=${latDiff}, lng=${lngDiff}`);
+                if (latDiff < 0.0001 && lngDiff < 0.0001) {
+                  console.log(`✅ Found matching marker, opening popup`);
+                  layer.openPopup();
+                }
+              }
+            });
+          }
+        }, 2000);
+        
+        return; // Exit early when we have a target store
+      } else {
+        console.log(`❌ Invalid coordinates: lat=${targetLat}, lng=${targetLng}`);
+      }
+    }
+
+    // Default behavior: fit to all stores when no target store
+    console.log(`ℹ️ No target store, fitting to all ${validStores.length} stores`);
+    if (validStores.length === 0) return;
 
     try {
       let bounds: L.LatLngBounds | null = null;
@@ -262,7 +358,7 @@ export default function StoreMapFixed({
     } catch (error) {
       console.error('Error fitting bounds:', error);
     }
-  }, [validStores, userLocation, mapReady, isMobile]);
+  }, [mapReady, targetStore, validStores, userLocation, isMobile]);
 
   return (
     <div className={`relative ${className}`} style={{ height }}>
