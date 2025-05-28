@@ -348,10 +348,10 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
           });
         });
 
-        // Find Stores Near Me button logic
-        var findBtn = document.getElementById('find-near-me');
-        if (findBtn) {
-          findBtn.addEventListener('click', function(e) {
+        // Find Stores Near Me button logic for both hero and CTA
+        function attachGeoHandler(btn) {
+          if (!btn) return;
+          btn.addEventListener('click', function(e) {
             e.preventDefault();
             if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
               alert('Geolocation only works on HTTPS or localhost. Please use a secure connection.');
@@ -361,8 +361,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
               alert('Geolocation is not supported by your browser.');
               return;
             }
-            findBtn.disabled = true;
-            findBtn.textContent = 'Locating...';
+            btn.disabled = true;
+            btn.textContent = 'Locating...';
             navigator.geolocation.getCurrentPosition(
               async function(position) {
                 const { latitude, longitude } = position.coords;
@@ -390,8 +390,8 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
                   alert('Could not determine your location.');
                   console.error(e);
                 }
-                findBtn.disabled = false;
-                findBtn.textContent = 'Find Stores Near Me';
+                btn.disabled = false;
+                btn.textContent = 'Find Stores Near Me';
               },
               function(error) {
                 if (error.code === error.PERMISSION_DENIED) {
@@ -399,15 +399,15 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
                 } else {
                   alert('Unable to retrieve your location.');
                 }
-                findBtn.disabled = false;
-                findBtn.textContent = 'Find Stores Near Me';
+                btn.disabled = false;
+                btn.textContent = 'Find Stores Near Me';
               },
               { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
           });
-        } else {
-          console.error('Find Stores Near Me button not found!');
         }
+        attachGeoHandler(document.getElementById('find-near-me'));
+        attachGeoHandler(document.getElementById('find-near-me-cta'));
       });
     </script>
   </body>
