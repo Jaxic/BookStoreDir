@@ -92,6 +92,15 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
               <img src="/images/logo.png" alt="Born Again Books logo" class="w-5 h-5 mr-2" />
               Browse All Stores
             </a>
+            <button 
+              id="find-near-me"
+              type="button"
+              class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
+              aria-label="Find stores near me"
+            >
+              <img src="/images/logo.png" alt="Born Again Books logo" class="w-5 h-5 mr-2" />
+              Find Stores Near Me
+            </button>
           </div>
         </div>
       </div>
@@ -236,7 +245,7 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
       <!-- Call to Action -->
       <section class="py-16 bg-gradient-to-r from-primary to-accent text-secondary">
         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 class="text-3xl font-bold mb-4">Start Your Bookstore Adventure Today</h2>
+          <h2 class="text-3xl font-bold mb-4">Start Your Used Bookstore Adventure Today</h2>
           <p class="text-xl text-secondary mb-8">
             Find your perfect reading spot, discover new authors, and support the literary community in your area.
           </p>
@@ -329,6 +338,57 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
             }
           });
         });
+
+        // Find Stores Near Me button logic
+        var findBtn = document.getElementById('find-near-me');
+        if (findBtn) {
+          findBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+              alert('Geolocation is not supported by your browser.');
+              return;
+            }
+            findBtn.disabled = true;
+            findBtn.textContent = 'Locating...';
+            navigator.geolocation.getCurrentPosition(async function(position) {
+              const { latitude, longitude } = position.coords;
+              try {
+                const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const city = data.address.city || data.address.town || data.address.village || data.address.hamlet;
+                const province = data.address.state || data.address.region;
+                function slugify(str) {
+                  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                }
+                if (province) {
+                  const provinceSlug = slugify(province);
+                  if (city) {
+                    const citySlug = slugify(city);
+                    window.location.href = `/${provinceSlug}/${citySlug}`;
+                  } else {
+                    window.location.href = `/${provinceSlug}`;
+                  }
+                } else {
+                  alert('Could not determine your province.');
+                  findBtn.disabled = false;
+                  findBtn.textContent = 'Find Stores Near Me';
+                }
+              } catch (e) {
+                alert('Could not determine your location.');
+                findBtn.disabled = false;
+                findBtn.textContent = 'Find Stores Near Me';
+              }
+            }, function(error) {
+              if (error.code === error.PERMISSION_DENIED) {
+                alert('Location permission denied. Please allow access to use this feature.');
+              } else {
+                alert('Unable to retrieve your location.');
+              }
+              findBtn.disabled = false;
+              findBtn.textContent = 'Find Stores Near Me';
+            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+          });
+        }
       });
     </script>
   </body>
