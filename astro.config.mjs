@@ -203,7 +203,7 @@ export default defineConfig({
     },
   },
 
-  site: 'https://bookstore-directory.com',
+  site: 'https://bornagainbooks.ca',
   base: '/',
   
   security: {

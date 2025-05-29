@@ -5,6 +5,7 @@ import { generateStoreSlug } from '../utils/slugify';
 import type { ProcessedBookstore } from '../types/bookstore';
 import path from 'path';
 import Layout from '../layouts/Layout.astro';
+import GeoButtonsScript from '../components/GeoButtonsScript.astro';
 
 // Load and process bookstore data
 const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
@@ -57,15 +58,17 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
         </div>
         <!-- Action Button -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <a 
-            href="/stores" 
+          <button 
+            id="find-near-me"
+            type="button"
             class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
+            aria-label="Find stores near me"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
             </svg>
             Find Stores Near Me
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -238,4 +241,5 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
     </div>
   </footer>
   <script type="module" src="/js/store-filters.js"></script>
+  <GeoButtonsScript />
 </Layout> 
