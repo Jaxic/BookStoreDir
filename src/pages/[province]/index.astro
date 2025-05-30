@@ -139,15 +139,15 @@ let showOtherCities = false;
         </p>
         <!-- Quick Stats -->
         <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
             <div class="text-2xl sm:text-3xl font-bold text-text">{province.totalStores}</div>
             <div class="text-sm text-text">Bookstores</div>
           </div>
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
             <div class="text-2xl sm:text-3xl font-bold text-text">{province.cities.length}</div>
             <div class="text-sm text-text">Cities</div>
           </div>
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
             <div class="text-2xl sm:text-3xl font-bold text-text">{topCities[0]?.name || '—'}</div>
             <div class="text-sm text-text">Top City</div>
           </div>
@@ -166,8 +166,8 @@ let showOtherCities = false;
     </div>
     <!-- Decorative wave -->
     <div class="relative">
-      <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
-        <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
+      <svg class="absolute bottom-0 w-full h-20" viewBox="0 0 1000 100" preserveAspectRatio="none" style="display: block;">
+        <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z" fill="#F6E9DD" />
       </svg>
     </div>
   </header>
