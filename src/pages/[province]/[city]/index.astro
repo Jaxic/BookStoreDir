@@ -142,6 +142,47 @@ const sortedBookstores = bookstores.sort((a, b) => {
     ]
   })} />
 
+  <!-- City Header (move outside main for full width) -->
+  <header 
+    class="relative bg-gradient-to-r from-primary to-accent"
+    role="banner"
+    style="background: linear-gradient(rgba(102,126,234,0.7), rgba(118,75,162,0.7)), url('/images/bookstore-hero.jpg') center/cover no-repeat;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-8 sm:pb-12 relative z-10">
+      <div class="text-center">
+        <div class="flex justify-center items-center mb-2">
+          <img src="/images/logo.png" alt="Born Again Books logo" style="width: 250px; height: 250px; object-fit: contain;" />
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
+          Discover {city.name} <span class="block text-text">Used Bookstores</span>
+        </h1>
+        <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
+          Explore {city.storeCount} used bookstores in {city.name}. Find your next read and support local businesses.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
+          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
+            <div class="text-2xl sm:text-3xl font-bold text-text">{city.storeCount}</div>
+            <div class="text-sm text-text">Bookstores</div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a 
+            href="/stores" 
+            class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            Browse All Stores
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="relative">
+      <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
+        <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
+      </svg>
+    </div>
+  </header>
   <main class="container mx-auto px-4 py-8">
     <!-- Breadcrumb Navigation -->
     <nav class="flex mb-6 text-sm text-gray-600" aria-label="Breadcrumb">
@@ -161,52 +202,6 @@ const sortedBookstores = bookstores.sort((a, b) => {
         </li>
       </ol>
     </nav>
-
-    <!-- City Header -->
-    <header 
-      class="relative bg-gradient-to-r from-primary to-accent"
-      role="banner"
-      style="background: linear-gradient(rgba(102,126,234,0.7), rgba(118,75,162,0.7)), url('/images/bookstore-hero.jpg') center/cover no-repeat;">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-8 sm:pb-12 relative z-10">
-        <div class="text-center">
-          <!-- Logo/Brand -->
-          <div class="flex justify-center items-center mb-2">
-            <img src="/images/logo.png" alt="Born Again Books logo" style="width: 250px; height: 250px; object-fit: contain;" />
-          </div>
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
-            Discover {city.name} <span class="block text-text">Used Bookstores</span>
-          </h1>
-          <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
-            Explore {city.storeCount} used bookstores in {city.name}. Find your next read and support local businesses.
-          </p>
-          <!-- Quick Stats -->
-          <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4">
-              <div class="text-2xl sm:text-3xl font-bold text-text">{city.storeCount}</div>
-              <div class="text-sm text-text">Bookstores</div>
-            </div>
-          </div>
-          <!-- Action Button -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a 
-              href="/stores" 
-              class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
-            >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-              </svg>
-              Browse All Stores
-            </a>
-          </div>
-        </div>
-      </div>
-      <!-- Decorative wave -->
-      <div class="relative">
-        <svg class="absolute bottom-0 w-full h-6 text-background" fill="currentColor" viewBox="0 0 1000 100" preserveAspectRatio="none">
-          <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z"></path>
-        </svg>
-      </div>
-    </header>
 
     <!-- Quick Actions -->
     <div class="flex flex-wrap gap-4 mb-8">
