@@ -310,8 +310,8 @@ const sortedBookstores = bookstores.sort((a, b) => {
     )}
 
     <!-- SEO Content -->
-    <section class="mt-16 prose prose-gray max-w-none">
-      <h2>Bookstore Guide: {city.name}, {province.name}</h2>
+    <section class="mt-16 max-w-4xl mx-auto bg-white bg-opacity-95 rounded-2xl shadow-2xl py-12 px-10 prose prose-gray space-y-6 text-center">
+      <h2 class="!text-3xl !font-bold !text-primary mb-4 text-center">Bookstore Guide: {city.name}, {province.name}</h2>
       <p>
         {city.name} offers {city.storeCount} distinctive bookstore{city.storeCount !== 1 ? 's' : ''} 
         that serve book lovers with diverse tastes and interests. From vintage paperbacks to rare first editions, 
