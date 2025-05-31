@@ -1,0 +1,79 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Layout from './Layout.astro';
+const { post, Content } = Astro.props as {
+  post: CollectionEntry<'blog'>;
+  Content: any;
+};
+---
+<Layout title={post.data.title}>
+  <div class="bg-background min-h-screen font-['Inter'] py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <a href="/blog" class="inline-block mb-6 text-accent hover:underline font-semibold text-lg">← Back to Blog</a>
+      <article class="bg-white rounded-2xl shadow-xl overflow-hidden border border-accent/20">
+        {post.data.image && (
+          <img src={post.data.image.url} alt={post.data.image.alt} class="w-full h-64 object-cover object-center" />
+        )}
+        <div class="p-8">
+          <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-primary leading-tight">{post.data.title}</h1>
+          <div class="flex flex-wrap items-center gap-4 text-secondary/90 text-sm mb-2">
+            <span>{post.data.pubDate.toLocaleDateString()}</span>
+            {post.data.author && <span>by <span class="font-semibold">{post.data.author}</span></span>}
+          </div>
+          <div class="flex flex-wrap gap-2 mb-4">
+            {post.data.tags.map(tag => (
+              <span class="bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-medium">{tag}</span>
+            ))}
+          </div>
+          <p class="text-lg text-secondary mb-6 border-b border-accent/10 pb-4">{post.data.description}</p>
+          <section class="prose prose-lg max-w-none text-text mt-6">
+            <Content />
+          </section>
+        </div>
+      </article>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.blog-post {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.blog-post header h1 {
+  margin-bottom: 0.5rem;
+}
+.meta {
+  color: #888;
+  font-size: 0.95em;
+  margin-bottom: 1rem;
+}
+.author {
+  margin-left: 1em;
+}
+.cover-image {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+.content {
+  margin-top: 2rem;
+  line-height: 1.7;
+}
+.tags {
+  margin-top: 2rem;
+}
+.tag {
+  background: #eee;
+  border-radius: 0.5em;
+  padding: 0.2em 0.6em;
+  margin-right: 0.3em;
+  font-size: 0.85em;
+}
+</style> 
