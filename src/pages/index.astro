@@ -5,11 +5,17 @@ import type { ProcessedBookstore } from '../types/bookstore';
 import StoreMapFixed from '../components/map/StoreMapFixed';
 import Navigation from '../components/Navigation.astro';
 import path from 'path';
+import { getCollection } from 'astro:content';
 
 // Load and process bookstore data
 const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
 const { records } = await parseBookstores(csvPath);
 const processedStores: ProcessedBookstore[] = records.map(processBookstore);
+
+// Fetch blog posts
+const blogPosts = (await getCollection('blog', ({ data }) =>
+  import.meta.env.PROD ? data.draft !== true : true
+)).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()).slice(0, 3);
 ---
 
 <html lang="en">
@@ -251,6 +257,46 @@ const processedStores: ProcessedBookstore[] = records.map(processBookstore);
             opacity: 1;
           }
         </style>
+      </section>
+
+      <!-- Featured Blog Posts Section -->
+      <section class="py-16 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl sm:text-3xl font-bold text-text mb-8 text-center">Featured Blog Posts</h2>
+          <div class="flex gap-8 overflow-x-auto pb-4 snap-x">
+            {blogPosts.map(post => (
+              <article
+                class="relative min-w-[340px] max-w-sm w-[340px] h-[480px] flex-shrink-0 bg-white rounded-3xl shadow-2xl overflow-hidden border border-accent/20 transition-transform hover:scale-[1.04] snap-center flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+                tabindex="0"
+                onClick={() => window.location.href = `/blog/${post.id}`}
+                onKeyDown={e => { if (e.key === 'Enter') window.location.href = `/blog/${post.id}`; }}
+                role="link"
+                aria-label={post.data.title}
+              >
+                {post.data.image && (
+                  <img src={post.data.image.url} alt={post.data.image.alt} class="w-full h-48 object-cover object-center rounded-t-3xl group-hover:opacity-90 transition-opacity" />
+                )}
+                <div class="flex-1 flex flex-col p-6">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">BLOG</span>
+                    <span class="text-gray-400 text-xs font-bold tracking-wide">{post.data.pubDate.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}</span>
+                  </div>
+                  <h2 class="text-2xl font-bold text-text mb-3 leading-tight line-clamp-3 group-hover:text-accent transition-colors">{post.data.title}</h2>
+                  <div class="flex flex-wrap gap-1 mb-4">
+                    {post.data.tags.map(tag => (
+                      <span class="bg-accent/10 text-accent px-2 py-0.5 rounded-full text-xs font-medium">{tag}</span>
+                    ))}
+                  </div>
+                  <p class="text-base text-gray-700 mb-4 line-clamp-3">{post.data.description}</p>
+                  <div class="mt-auto pt-2">
+                    <span class="text-gray-500 text-sm">{post.data.author ?? "Unknown"}</span>
+                  </div>
+                </div>
+                <a href={`/blog/${post.id}`} class="absolute inset-0 z-10" aria-label={post.data.title} tabindex="-1"></a>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
 
       <!-- Call to Action -->
