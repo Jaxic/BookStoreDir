@@ -2,8 +2,8 @@
 title: "Why Used Books Are the Future of Reading"
 pubDate: 2024-06-01
 image:
-  url: "/images/welcome.jpg"
-  alt: "Welcome banner for the Astro blog"
+  url: "/images/Blog/Used_Books_Future.webp"
+  alt: "Why Used Books Are the Future of Reading"
 tags: ["Used Books"]
 draft: false
 author: "Nicole Dubois"
