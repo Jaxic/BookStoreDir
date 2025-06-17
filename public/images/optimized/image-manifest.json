@@ -1,10 +1,269 @@
 {
-  "generated": "2025-05-28T00:25:25.414Z",
-  "totalImages": 269,
-  "totalOriginalSize": 36103403,
-  "totalOptimizedSize": 40708093,
-  "compressionRatio": -12.754171677390078,
+  "generated": "2025-06-17T23:49:34.239Z",
+  "totalImages": 285,
+  "totalOriginalSize": 40079787,
+  "totalOptimizedSize": 42594759,
+  "compressionRatio": -6.274913586741366,
   "images": [
+    {
+      "path": "Blog\\ComfyUI_00085_.webp",
+      "originalSize": 19366,
+      "optimizedSizes": {
+        "webp": 18968
+      },
+      "totalOptimizedSize": 18968,
+      "compressionRatio": "2.06",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00096_.webp",
+      "originalSize": 36284,
+      "optimizedSizes": {
+        "webp": 34718
+      },
+      "totalOptimizedSize": 34718,
+      "compressionRatio": "4.32",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00168_.webp",
+      "originalSize": 20464,
+      "optimizedSizes": {
+        "webp": 19690
+      },
+      "totalOptimizedSize": 19690,
+      "compressionRatio": "3.78",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00218_.webp",
+      "originalSize": 66318,
+      "optimizedSizes": {
+        "webp": 61800
+      },
+      "totalOptimizedSize": 61800,
+      "compressionRatio": "6.81",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00232_.webp",
+      "originalSize": 23238,
+      "optimizedSizes": {
+        "webp": 22258
+      },
+      "totalOptimizedSize": 22258,
+      "compressionRatio": "4.22",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00233_.webp",
+      "originalSize": 24902,
+      "optimizedSizes": {
+        "webp": 22818
+      },
+      "totalOptimizedSize": 22818,
+      "compressionRatio": "8.37",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00254_.webp",
+      "originalSize": 58384,
+      "optimizedSizes": {
+        "webp": 54476
+      },
+      "totalOptimizedSize": 54476,
+      "compressionRatio": "6.69",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00255_.webp",
+      "originalSize": 85518,
+      "optimizedSizes": {
+        "webp": 81686
+      },
+      "totalOptimizedSize": 81686,
+      "compressionRatio": "4.48",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00263_.webp",
+      "originalSize": 57330,
+      "optimizedSizes": {
+        "webp": 54068
+      },
+      "totalOptimizedSize": 54068,
+      "compressionRatio": "5.69",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00279_.webp",
+      "originalSize": 120896,
+      "optimizedSizes": {
+        "webp": 112308
+      },
+      "totalOptimizedSize": 112308,
+      "compressionRatio": "7.10",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\ComfyUI_00282_.webp",
+      "originalSize": 144204,
+      "optimizedSizes": {
+        "webp": 138478
+      },
+      "totalOptimizedSize": 138478,
+      "compressionRatio": "3.97",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\Used_Books_Condition.webp",
+      "originalSize": 42322,
+      "optimizedSizes": {
+        "webp": 40366
+      },
+      "totalOptimizedSize": 40366,
+      "compressionRatio": "4.62",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "Blog\\Used_Books_Future.webp",
+      "originalSize": 158520,
+      "optimizedSizes": {
+        "webp": 153440
+      },
+      "totalOptimizedSize": 153440,
+      "compressionRatio": "3.20",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "webp"
+      ]
+    },
+    {
+      "path": "bookstore-hero.jpg",
+      "originalSize": 369276,
+      "optimizedSizes": {
+        "jpg": 298777,
+        "webp": 116984
+      },
+      "totalOptimizedSize": 415761,
+      "compressionRatio": "-12.59",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "jpg",
+        "webp"
+      ]
+    },
+    {
+      "path": "ComfyUI_00305_.png",
+      "originalSize": 1319995,
+      "optimizedSizes": {
+        "png": 437766,
+        "webp": 82928
+      },
+      "totalOptimizedSize": 520694,
+      "compressionRatio": "60.55",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "png",
+        "webp"
+      ]
+    },
     {
       "path": "default-bookstore.jpg",
       "originalSize": 3250342,
@@ -21,6 +280,25 @@
       "aspectRatio": 1.3333333333333333,
       "formats": [
         "jpg",
+        "webp"
+      ]
+    },
+    {
+      "path": "logo.png",
+      "originalSize": 1429367,
+      "optimizedSizes": {
+        "png": 70183,
+        "webp": 64954
+      },
+      "totalOptimizedSize": 135137,
+      "compressionRatio": "90.55",
+      "dimensions": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatio": 1.3333333333333333,
+      "formats": [
+        "png",
         "webp"
       ]
     },

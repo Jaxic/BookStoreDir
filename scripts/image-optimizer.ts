@@ -75,7 +75,7 @@ class ImageOptimizer {
   
   constructor(config?: Partial<ImageOptimizationConfig>) {
     this.config = {
-      inputDir: './public/images',
+      inputDir: './public/images/Raw',
       outputDir: './public/images/optimized',
       quality: {
         jpeg: 85,

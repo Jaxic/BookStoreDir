@@ -1,14 +1,14 @@
 # Image Optimization Report
 
-Generated: 5/27/2025, 6:25:25 PM
+Generated: 6/17/2025, 5:49:34 PM
 
 ## Summary
 
-- **Total Images Processed**: 269
-- **Original Total Size**: 34.43 MB
-- **Optimized Total Size**: 38.82 MB
+- **Total Images Processed**: 285
+- **Original Total Size**: 38.22 MB
+- **Optimized Total Size**: 40.62 MB
 - **Space Saved**: NaN undefined
-- **Compression Ratio**: -12.75%
+- **Compression Ratio**: -6.27%
 
 ## Configuration
 
@@ -23,7 +23,23 @@ Generated: 5/27/2025, 6:25:25 PM
 
 | Image | Original Size | Optimized Size | Savings | Formats |
 |-------|---------------|----------------|---------|---------|
+| Blog\ComfyUI_00085_.webp | 18.91 KB | 18.52 KB | 2.06% | webp |
+| Blog\ComfyUI_00096_.webp | 35.43 KB | 33.9 KB | 4.32% | webp |
+| Blog\ComfyUI_00168_.webp | 19.98 KB | 19.23 KB | 3.78% | webp |
+| Blog\ComfyUI_00218_.webp | 64.76 KB | 60.35 KB | 6.81% | webp |
+| Blog\ComfyUI_00232_.webp | 22.69 KB | 21.74 KB | 4.22% | webp |
+| Blog\ComfyUI_00233_.webp | 24.32 KB | 22.28 KB | 8.37% | webp |
+| Blog\ComfyUI_00254_.webp | 57.02 KB | 53.2 KB | 6.69% | webp |
+| Blog\ComfyUI_00255_.webp | 83.51 KB | 79.77 KB | 4.48% | webp |
+| Blog\ComfyUI_00263_.webp | 55.99 KB | 52.8 KB | 5.69% | webp |
+| Blog\ComfyUI_00279_.webp | 118.06 KB | 109.68 KB | 7.10% | webp |
+| Blog\ComfyUI_00282_.webp | 140.82 KB | 135.23 KB | 3.97% | webp |
+| Blog\Used_Books_Condition.webp | 41.33 KB | 39.42 KB | 4.62% | webp |
+| Blog\Used_Books_Future.webp | 154.8 KB | 149.84 KB | 3.20% | webp |
+| bookstore-hero.jpg | 360.62 KB | 406.02 KB | -12.59% | jpg, webp |
+| ComfyUI_00305_.png | 1.26 MB | 508.49 KB | 60.55% | png, webp |
 | default-bookstore.jpg | 3.1 MB | 3.3 MB | -6.39% | jpg, webp |
+| logo.png | 1.36 MB | 131.97 KB | 90.55% | png, webp |
 | StoreImages\ABC_Antiques_Books_Collectibles.jpg | 182.34 KB | 196.5 KB | -7.76% | jpg, webp |
 | StoreImages\Acadia_Art_Rare_Books_-_Est_1931.jpg | 160.27 KB | 185.46 KB | -15.72% | jpg, webp |
 | StoreImages\Agricola_Street_Books.jpg | 117.06 KB | 122.38 KB | -4.54% | jpg, webp |
@@ -310,6 +326,6 @@ To use the optimized images in your application:
 ## Performance Impact
 
 - **Reduced Bandwidth**: NaN undefined less data transfer
-- **Faster Load Times**: Estimated -10.203337341912063% improvement
+- **Faster Load Times**: Estimated -5.019930869393093% improvement
 - **Better Core Web Vitals**: Improved LCP and CLS scores
 - **Mobile Performance**: Significant improvement on slower connections
