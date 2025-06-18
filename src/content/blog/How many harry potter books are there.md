@@ -2,7 +2,7 @@
 title: "How many Harry Potter books are there?"
 pubDate: 2024-06-17
 image:
-  url: "/images/Blog/How many Harry Potter books are there.webp"
+  url: "/images/Blog/How_many_Harry_Potter_books_are_there.webp"
   alt: "How many Harry Potter books are there?"
 tags: ["Used Books"]
 draft: false
