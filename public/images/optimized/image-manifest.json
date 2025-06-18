@@ -1,19 +1,19 @@
 {
-  "generated": "2025-06-17T23:59:51.640Z",
+  "generated": "2025-06-18T00:02:51.942Z",
   "totalImages": 1,
-  "totalOriginalSize": 1389034,
-  "totalOptimizedSize": 582118,
-  "compressionRatio": 58.09188256011012,
+  "totalOriginalSize": 1319995,
+  "totalOptimizedSize": 520694,
+  "compressionRatio": 60.55333542930087,
   "images": [
     {
       "path": "ComfyUI_00305_.png",
-      "originalSize": 1389034,
+      "originalSize": 1319995,
       "optimizedSizes": {
-        "png": 483538,
-        "webp": 98580
+        "png": 437766,
+        "webp": 82928
       },
-      "totalOptimizedSize": 582118,
-      "compressionRatio": "58.09",
+      "totalOptimizedSize": 520694,
+      "compressionRatio": "60.55",
       "dimensions": {
         "width": 800,
         "height": 600

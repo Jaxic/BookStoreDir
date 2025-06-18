@@ -1,14 +1,14 @@
 # Image Optimization Report
 
-Generated: 6/17/2025, 5:59:51 PM
+Generated: 6/17/2025, 6:02:51 PM
 
 ## Summary
 
 - **Total Images Processed**: 1
-- **Original Total Size**: 1.32 MB
-- **Optimized Total Size**: 568.47 KB
-- **Space Saved**: 788 KB
-- **Compression Ratio**: 58.09%
+- **Original Total Size**: 1.26 MB
+- **Optimized Total Size**: 508.49 KB
+- **Space Saved**: 780.57 KB
+- **Compression Ratio**: 60.55%
 
 ## Configuration
 
@@ -23,7 +23,7 @@ Generated: 6/17/2025, 5:59:51 PM
 
 | Image | Original Size | Optimized Size | Savings | Formats |
 |-------|---------------|----------------|---------|---------|
-| ComfyUI_00305_.png | 1.32 MB | 568.47 KB | 58.09% | png, webp |
+| ComfyUI_00305_.png | 1.26 MB | 508.49 KB | 60.55% | png, webp |
 
 ## Recommendations
 
@@ -40,7 +40,7 @@ To use the optimized images in your application:
 
 ## Performance Impact
 
-- **Reduced Bandwidth**: 788 KB less data transfer
-- **Faster Load Times**: Estimated 46.4735060480881% improvement
+- **Reduced Bandwidth**: 780.57 KB less data transfer
+- **Faster Load Times**: Estimated 48.4426683434407% improvement
 - **Better Core Web Vitals**: Improved LCP and CLS scores
 - **Mobile Performance**: Significant improvement on slower connections
