@@ -38,9 +38,9 @@ const FAQ: React.FC<Props> = ({ faqs }) => {
 
   return (
     <section ref={sectionRef} className="faq-section py-32 px-4 max-w-4xl mx-auto">
-      <h2 className="faq-title text-center font-black text-[clamp(2.5rem,6vw,4rem)] mb-16" style={{textShadow: '0 2px 8px rgba(0,0,0,0.18)'}}>
-        <span className="text-white">Frequently Asked </span>
-        <span className="gradient-text">Questions</span>
+      <h2 className="faq-title text-center font-black text-[clamp(2.5rem,6vw,4rem)] mb-16" style={{textShadow: '0 2px 8px rgba(0,0,0,0.12)'}}>
+        <span className="text-gray-900">Frequently Asked </span>
+        <span className="gradient-text" style={{textShadow: '0 2px 8px rgba(0,0,0,0.18)'}}>Questions</span>
       </h2>
       <div className="faq-grid space-y-6">
         {faqs.map((faq, i) => (
