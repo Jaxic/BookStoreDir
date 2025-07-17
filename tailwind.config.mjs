@@ -1,4 +1,5 @@
 import typography from '@tailwindcss/typography';
+import lineClamp from '@tailwindcss/line-clamp';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -27,7 +28,13 @@ export default {
         text: '#232323',
         background: '#FFFDF6',
       }),
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
+      animation: {
+        'marquee': 'marquee 20s linear infinite',
+      },
     },
   },
-  plugins: [typography],
+  plugins: [typography, lineClamp],
 }; 

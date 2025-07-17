@@ -6,6 +6,22 @@ import StoreMapFixed from '../components/map/StoreMapFixed';
 import Navigation from '../components/Navigation.astro';
 import path from 'path';
 import { getCollection } from 'astro:content';
+// Animation and UI components
+import DynamicHero from '../components/react/animations/DynamicHero.tsx';
+import ScrollTriggeredStats from '../components/react/animations/ScrollTriggeredStats.tsx';
+import InteractiveSearch from '../components/react/animations/InteractiveSearch.tsx';
+import MarqueeText from '../components/react/ui/MarqueeText.tsx';
+import CursorFollower from '../components/react/ui/CursorFollower.tsx';
+
+// Sample provinces data for ScrollTriggeredStats
+const provinces = [
+  { name: 'Ontario', count: 89, color: 'from-blue-500 to-purple-600' },
+  { name: 'British Columbia', count: 67, color: 'from-green-500 to-teal-600' },
+  { name: 'Quebec', count: 54, color: 'from-red-500 to-pink-600' },
+  { name: 'Alberta', count: 32, color: 'from-orange-500 to-red-600' },
+  { name: 'Nova Scotia', count: 18, color: 'from-indigo-500 to-blue-600' },
+  { name: 'Manitoba', count: 10, color: 'from-purple-500 to-indigo-600' }
+];
 
 // Load and process bookstore data
 const csvPath = path.join(process.cwd(), 'src', 'data', 'bookstores.csv');
@@ -131,6 +147,23 @@ const blogPosts = (await getCollection('blog', ({ data }) =>
     </header>
 
     <main id="main-content">
+      <!-- Dynamic Hero Section -->
+      <DynamicHero client:load />
+      <!-- Optional: Cursor Follower (uncomment to enable) -->
+      <!-- <CursorFollower client:load /> -->
+      <!-- Marquee Section -->
+      <section class="py-20 border-t border-white/10">
+        <MarqueeText 
+          client:load 
+          className="text-6xl md:text-8xl font-black opacity-20"
+        >
+          DISCOVER • EXPLORE • READ • REPEAT •
+        </MarqueeText>
+      </section>
+      <!-- Stats Section -->
+      <ScrollTriggeredStats client:load provinces={provinces} />
+      <!-- Search Section -->
+      <InteractiveSearch client:load />
       <!-- Features Section -->
       <section class="py-16 bg-secondary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,6 +264,7 @@ const blogPosts = (await getCollection('blog', ({ data }) =>
           </div>
         </div>
         <style>
+          @import '../styles/animations.css';
           .faq-item[open], .faq-item:has([aria-expanded="true"]) {
             background: rgba(var(--color-accent), 0.05);
             border-color: var(--color-accent);
@@ -255,6 +289,9 @@ const blogPosts = (await getCollection('blog', ({ data }) =>
           .faq-panel:not(.hidden) {
             max-height: 300px;
             opacity: 1;
+          }
+          .animate-marquee {
+            animation: marquee 20s linear infinite;
           }
         </style>
       </section>
