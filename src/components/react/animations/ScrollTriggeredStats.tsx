@@ -31,11 +31,11 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
       rotationX: 0,
       scale: 1,
       duration: 1.2,
-      stagger: 0.15,
+      stagger: 0.08, // faster
       ease: 'back.out(1.7)',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 75%',
+        start: 'top 90%', // appear sooner
         end: 'bottom 25%',
         toggleActions: 'play none none reverse'
       }
