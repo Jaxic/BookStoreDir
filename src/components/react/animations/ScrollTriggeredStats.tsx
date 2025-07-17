@@ -21,18 +21,20 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
     gsap.fromTo(cardsRef.current, {
       y: 100,
       opacity: 0,
-      rotationX: 15
+      rotationX: 15,
+      scale: 0.8
     }, {
       y: 0,
       opacity: 1,
       rotationX: 0,
-      duration: 1,
-      stagger: 0.2,
-      ease: 'power3.out',
+      scale: 1,
+      duration: 1.2,
+      stagger: 0.15,
+      ease: 'back.out(1.7)',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 70%',
-        end: 'bottom 30%',
+        start: 'top 75%',
+        end: 'bottom 25%',
         toggleActions: 'play none none reverse'
       }
     });
@@ -46,12 +48,13 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
           textContent: 0
         }, {
           textContent: finalNumber,
-          duration: 2,
+          duration: 2.5,
           ease: 'power2.out',
           snap: { textContent: 1 },
+          delay: index * 0.1,
           scrollTrigger: {
             trigger: card,
-            start: 'top 80%',
+            start: 'top 85%',
             toggleActions: 'play none none reverse'
           }
         });
@@ -64,36 +67,31 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
   }, [provinces]);
 
   return (
-    <section ref={sectionRef} className="py-20 px-4">
+    <section ref={sectionRef} className="stats-section py-32 px-4 bg-black">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-6xl font-black text-center mb-16">
+        <h2 className="stats-title text-center mb-16 font-black text-[clamp(3rem,8vw,6rem)] leading-tight">
           Bookstores <span className="gradient-text">Across</span> Canada
         </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mt-12">
           {provinces.map((province, index) => (
             <div
               key={province.name}
               ref={el => { if (el) cardsRef.current[index] = el; }}
-              className="group relative"
+              className="stat-card group relative bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-10 text-center overflow-hidden shadow-2xl transform transition-all duration-700 hover:scale-105 hover:border-blue-400/40 focus-within:scale-105 focus-within:border-blue-400/40"
+              tabIndex={0}
+              aria-label={`${province.count} bookstores in ${province.name}`}
             >
               {/* Gradient background */}
-              <div className={
-                `absolute inset-0 bg-gradient-to-br ${province.color}
-                rounded-2xl opacity-20 group-hover:opacity-40
-                transition-all duration-700 scale-95 group-hover:scale-100
-                blur-xl group-hover:blur-lg`
-              } />
-              
+              <div className={`absolute inset-0 rounded-3xl z-0 pointer-events-none bg-gradient-to-br ${province.color} opacity-20 group-hover:opacity-40 transition-all duration-700 scale-95 group-hover:scale-100 blur-xl group-hover:blur-lg`} />
               {/* Card content */}
-              <div className="relative glass rounded-2xl p-8 hover:border-white/20 transition-all duration-700">
-                <div className="stat-number text-4xl md:text-5xl font-black mb-4 gradient-text">
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="stat-number text-5xl md:text-6xl font-black mb-4 gradient-text select-none">
                   0
                 </div>
-                <div className="text-xl font-light text-gray-300 mb-2">
+                <div className="stat-label text-xl font-light text-gray-200 mb-2">
                   Bookstores
                 </div>
-                <div className="text-2xl font-bold">
+                <div className="stat-location text-2xl font-bold text-white">
                   {province.name}
                 </div>
               </div>
@@ -101,6 +99,18 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
           ))}
         </div>
       </div>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .gradient-text {
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+          `
+        }}
+      />
     </section>
   );
 };

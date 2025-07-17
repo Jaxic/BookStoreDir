@@ -1,241 +1,107 @@
 ---
-// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import DynamicHero from '../components/react/animations/DynamicHero.tsx';
+import WhyChoose from '../components/react/animations/WhyChoose.tsx';
+import MarqueeText from '../components/react/ui/MarqueeText.tsx';
+import ScrollTriggeredStats from '../components/react/animations/ScrollTriggeredStats.tsx';
+import BlogPosts from '../components/react/animations/BlogPosts.tsx';
+import FAQ from '../components/react/animations/FAQ.tsx';
+import CTASection from '../components/react/animations/CTASection.tsx';
+import Footer from '../components/react/animations/Footer.tsx';
+
+// Example dynamic data (replace with real data as needed)
+const storeCount = 270;
+const provinces = [
+  { name: 'Ontario', count: 89, color: 'from-blue-500 to-purple-500' },
+  { name: 'British Columbia', count: 67, color: 'from-purple-500 to-pink-500' },
+  { name: 'Quebec', count: 54, color: 'from-pink-500 to-blue-500' },
+  { name: 'Alberta', count: 32, color: 'from-blue-500 to-pink-500' },
+  { name: 'Nova Scotia', count: 18, color: 'from-purple-500 to-blue-500' },
+  { name: 'Manitoba', count: 10, color: 'from-pink-500 to-purple-500' },
+];
+const blogPosts = [
+  {
+    image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
+    date: 'JUN 01, 2024',
+    title: 'Book Condition Guide: Understanding Used Book Grading Systems',
+    excerpt: 'Learn how to evaluate the condition of used books and understand the standard grading systems used by bookstores across Canada.',
+    author: 'Nicole Dubois',
+    url: '#',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    date: 'MAY 15, 2024',
+    title: 'Hidden Literary Gems: Discovering Independent Bookstores',
+    excerpt: 'Explore the unique character and charm of independent bookstores, and why they\'re essential to Canada\'s literary landscape.',
+    author: 'Sarah Mitchell',
+    url: '#',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=300&fit=crop',
+    date: 'APR 28, 2024',
+    title: 'Supporting Local: The Economic Impact of Used Bookstores',
+    excerpt: 'Discover how shopping at local used bookstores contributes to community economic growth and cultural preservation.',
+    author: 'David Chen',
+    url: '#',
+  },
+];
+const faqs = [
+  {
+    question: 'How do I find bookstores near me?',
+    answer: 'Use our search feature to find bookstores by city, province, or specialty. You can also browse by province to discover new stores in your area.',
+  },
+  {
+    question: 'Are the store hours and information up to date?',
+    answer: 'We regularly update our database, but we recommend calling ahead or checking the store\'s website to confirm current hours and availability.',
+  },
+  {
+    question: 'Can I add my bookstore to the directory?',
+    answer: 'Yes! If you own a used bookstore in Canada, contact us to have your store included in our directory. We\'re always looking to support independent bookstores.',
+  },
+  {
+    question: 'Do you provide reviews for bookstores?',
+    answer: 'We include basic information and descriptions for each bookstore. For detailed reviews, we recommend checking Google Reviews or visiting the stores\' websites.',
+  },
+];
+const ctaButtons = [
+  { label: 'Browse All Stores', href: '#' },
+  { label: 'Find Stores Near Me', href: '#' },
+];
+const footerSections = [
+  {
+    title: 'Explore',
+    links: [
+      { label: 'Home', href: '#home' },
+      { label: 'Browse Stores', href: '#bookstores' },
+      { label: 'Blog', href: '#blog' },
+      { label: 'FAQ', href: '#faq' },
+    ],
+  },
+  {
+    title: 'Connect',
+    links: [
+      { label: 'Contact Us', href: '#contact' },
+      { label: 'About', href: '#about' },
+      { label: 'Privacy Policy', href: '#privacy' },
+      { label: 'Terms of Service', href: '#terms' },
+    ],
+  },
+];
+const brand = 'Born Again Books';
+const description = 'Connecting book lovers with used bookstores across Canada. Supporting local businesses and fostering literary communities.';
+const copyright = '© 2025 Born Again Books. All rights reserved.';
+const tagline = 'Supporting used bookstores and book lovers across Canada';
 ---
 
 <Layout title="Born Again Books - Discover Used Bookstores Across Canada">
-    <!-- Header Navigation -->
-    <header class="header">
-        <nav class="nav-container">
-            <div class="logo">
-                <div class="logo-icon">📚</div>
-                <span>Born Again Books</span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#bookstores">Browse Stores</a></li>
-                <li><a href="#blog">Blog</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <h1 class="hero-title">
-                <div class="line">
-                    <span class="word">BORN</span>
-                </div>
-                <div class="line">
-                    <span class="word gradient-text">AGAIN</span>
-                </div>
-                <div class="line">
-                    <span class="word">BOOKS</span>
-                </div>
-            </h1>
-            <p class="hero-subtitle">Discover 270+ independent bookstores across Canada</p>
-            <div class="hero-cta">
-                <button class="cta-button">Explore Bookstores</button>
-                <button class="cta-button">Find Near Me</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Choose Used Bookstores -->
-    <section class="why-choose">
-        <h2 class="section-title">Why Choose <span class="gradient-text">Used Bookstores?</span></h2>
-        <p style="text-align: center; max-width: 800px; margin: 0 auto 4rem; font-size: 1.2rem; color: rgba(255,255,255,0.8);">
-            Used bookstores offer unique experiences that support local communities and foster literary culture.
-        </p>
-        <div class="why-choose-grid">
-            <div class="why-card">
-                <div class="why-icon">🏘️</div>
-                <h3>Support Local Community</h3>
-                <p>Every purchase helps support local jobs, community events, and the unique character of your neighborhood.</p>
-            </div>
-            <div class="why-card">
-                <div class="why-icon">✨</div>
-                <h3>Curated Selections</h3>
-                <p>Discover hand-picked books, hidden gems, and personalized recommendations from passionate booksellers.</p>
-            </div>
-            <div class="why-card">
-                <div class="why-icon">🎭</div>
-                <h3>Community Events</h3>
-                <p>Enjoy author readings, book clubs, literary discussions, and other events that bring book lovers together.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Marquee Section -->
-    <section class="marquee-section">
-        <div class="marquee">
-            <div class="marquee-content">
-                DISCOVER • EXPLORE • READ • REPEAT • DISCOVER • EXPLORE • READ • REPEAT • 
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section" id="bookstores">
-        <h2 class="stats-title">Bookstores <span class="gradient-text">Across</span> Canada</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">89</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">Ontario</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">67</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">British Columbia</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">54</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">Quebec</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">32</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">Alberta</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">18</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">Nova Scotia</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">10</div>
-                <div class="stat-label">Bookstores</div>
-                <div class="stat-location">Manitoba</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Blog Section -->
-    <section class="blog-section" id="blog">
-        <div class="blog-container">
-            <h2 class="blog-title">Latest <span class="gradient-text">Blog</span> Posts</h2>
-            <div class="blog-grid">
-                <article class="blog-card">
-                    <div class="blog-image" style="background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop')">
-                        <div class="blog-date">JUN 01, 2024</div>
-                    </div>
-                    <div class="blog-content">
-                        <h3 class="blog-card-title">Book Condition Guide: Understanding Used Book Grading Systems</h3>
-                        <p class="blog-excerpt">Learn how to evaluate the condition of used books and understand the standard grading systems used by bookstores across Canada.</p>
-                        <div class="blog-author">
-                            <span>By Nicole Dubois</span>
-                            <a href="#" class="read-more">Read More →</a>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="blog-card">
-                    <div class="blog-image" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop')">
-                        <div class="blog-date">MAY 15, 2024</div>
-                    </div>
-                    <div class="blog-content">
-                        <h3 class="blog-card-title">Hidden Literary Gems: Discovering Independent Bookstores</h3>
-                        <p class="blog-excerpt">Explore the unique character and charm of independent bookstores, and why they're essential to Canada's literary landscape.</p>
-                        <div class="blog-author">
-                            <span>By Sarah Mitchell</span>
-                            <a href="#" class="read-more">Read More →</a>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="blog-card">
-                    <div class="blog-image" style="background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=300&fit=crop')">
-                        <div class="blog-date">APR 28, 2024</div>
-                    </div>
-                    <div class="blog-content">
-                        <h3 class="blog-card-title">Supporting Local: The Economic Impact of Used Bookstores</h3>
-                        <p class="blog-excerpt">Discover how shopping at local used bookstores contributes to community economic growth and cultural preservation.</p>
-                        <div class="blog-author">
-                            <span>By David Chen</span>
-                            <a href="#" class="read-more">Read More →</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="faq-section" id="faq">
-        <h2 class="faq-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
-        <div class="faq-grid">
-            <div class="faq-item">
-                <h3 class="faq-question">How do I find bookstores near me?</h3>
-                <p class="faq-answer">Use our search feature to find bookstores by city, province, or specialty. You can also browse by province to discover new stores in your area.</p>
-            </div>
-            <div class="faq-item">
-                <h3 class="faq-question">Are the store hours and information up to date?</h3>
-                <p class="faq-answer">We regularly update our database, but we recommend calling ahead or checking the store's website to confirm current hours and availability.</p>
-            </div>
-            <div class="faq-item">
-                <h3 class="faq-question">Can I add my bookstore to the directory?</h3>
-                <p class="faq-answer">Yes! If you own a used bookstore in Canada, contact us to have your store included in our directory. We're always looking to support independent bookstores.</p>
-            </div>
-            <div class="faq-item">
-                <h3 class="faq-question">Do you provide reviews for bookstores?</h3>
-                <p class="faq-answer">We include basic information and descriptions for each bookstore. For detailed reviews, we recommend checking Google Reviews or visiting the stores' websites.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2 class="cta-title">Start Your Used Bookstore Adventure Today</h2>
-            <p class="cta-description">Find your perfect reading spot, discover new authors, and support the literary community in your area.</p>
-            <div class="cta-buttons">
-                <a href="#" class="cta-btn">Browse All Stores</a>
-                <a href="#" class="cta-btn">Find Stores Near Me</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3><span class="footer-logo">📚</span> Born Again Books</h3>
-                <p class="footer-description">
-                    Connecting book lovers with used bookstores across Canada. Supporting local businesses and fostering literary communities.
-                </p>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Explore</h3>
-                <ul class="footer-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#bookstores">Browse Stores</a></li>
-                    <li><a href="#blog">Blog</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Connect</h3>
-                <ul class="footer-links">
-                    <li><a href="#contact">Contact Us</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#privacy">Privacy Policy</a></li>
-                    <li><a href="#terms">Terms of Service</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2025 Born Again Books. All rights reserved.</p>
-            <p>Supporting used bookstores and book lovers across Canada</p>
-        </div>
-    </footer>
+  <DynamicHero client:load storeCount={storeCount} />
+  <WhyChoose client:load />
+  <MarqueeText client:load text="DISCOVER • EXPLORE • READ • REPEAT • DISCOVER • EXPLORE • READ • REPEAT • " />
+  <ScrollTriggeredStats client:load provinces={provinces} />
+  <BlogPosts client:load posts={blogPosts} />
+  <FAQ client:load faqs={faqs} />
+  <CTASection client:load title="Start Your Used Bookstore Adventure Today" description="Find your perfect reading spot, discover new authors, and support the literary community in your area." buttons={ctaButtons} />
+  <Footer client:load brand={brand} description={description} sections={footerSections} copyright={copyright} tagline={tagline} />
 </Layout>
 
 <style>
