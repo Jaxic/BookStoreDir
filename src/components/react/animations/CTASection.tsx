@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 interface CTAButton {
   label: string;
   href: string;
+  id?: string;
 }
 
 interface Props {
@@ -47,15 +48,28 @@ const CTASection: React.FC<Props> = ({ title, description, buttons }) => {
         </p>
         <div className="cta-buttons flex flex-col sm:flex-row gap-4 justify-center items-center">
           {buttons.map((btn, i) => (
-            <a
-              key={btn.label}
-              href={btn.href}
-              className="cta-btn bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-full font-semibold text-lg border-2 border-white/30 transition-all duration-300 hover:bg-white/30 hover:border-white/60 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
-              tabIndex={0}
-              aria-label={btn.label}
-            >
-              {btn.label}
-            </a>
+            btn.id ? (
+              <button
+                key={btn.label}
+                id={btn.id}
+                type="button"
+                className="cta-btn bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-full font-semibold text-lg border-2 border-white/30 transition-all duration-300 hover:bg-white/30 hover:border-white/60 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+                tabIndex={0}
+                aria-label={btn.label}
+              >
+                {btn.label}
+              </button>
+            ) : (
+              <a
+                key={btn.label}
+                href={btn.href}
+                className="cta-btn bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-full font-semibold text-lg border-2 border-white/30 transition-all duration-300 hover:bg-white/30 hover:border-white/60 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+                tabIndex={0}
+                aria-label={btn.label}
+              >
+                {btn.label}
+              </a>
+            )
           ))}
         </div>
       </div>
