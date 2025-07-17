@@ -48,7 +48,7 @@ const Footer: React.FC<Props> = ({ brand, description, sections, copyright, tagl
       <div ref={contentRef} className="footer-content max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
         <div className="footer-section">
           <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <span className="footer-logo text-3xl">📚</span> {brand}
+            <img src="/images/logo.png" alt="Born Again Books logo" style={{ width: 40, height: 40, objectFit: 'contain' }} className="footer-logo mr-2" /> {brand}
           </h3>
           <p className="footer-description text-white/80 leading-relaxed">
             {description}

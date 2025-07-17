@@ -1,11 +1,37 @@
 ---
 import '../styles/global.css';
+import Footer from '../components/react/animations/Footer.tsx';
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
 import Navigation from '../components/Navigation.astro';
+
+// Footer props (defaults)
+const brand = 'Born Again Books';
+const description = 'Connecting book lovers with used bookstores across Canada. Supporting local businesses and fostering literary communities.';
+const footerSections = [
+  {
+    title: 'Explore',
+    links: [
+      { label: 'Home', href: '/' },
+      { label: 'Browse Stores', href: '/stores' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'FAQ', href: '#faq' },
+    ],
+  },
+  {
+    title: 'Connect',
+    links: [
+      { label: 'Contact Us', href: 'mailto:bornagainbookscanada@gmail.com' },
+      { label: 'About', href: '/about' },
+      { label: 'Privacy Policy', href: '/privacy' },
+    ],
+  },
+];
+const copyright = '© 2025 Born Again Books. All rights reserved.';
+const tagline = 'Supporting used bookstores and book lovers across Canada';
 ---
 
 <!DOCTYPE html>
@@ -22,6 +48,7 @@ import Navigation from '../components/Navigation.astro';
   <body class="min-h-screen bg-gray-50 font-inter">
     <Navigation />
     <slot />
+    <Footer brand={brand} description={description} sections={footerSections} copyright={copyright} tagline={tagline} />
   </body>
 </html>
 
