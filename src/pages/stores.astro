@@ -17,70 +17,59 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <Layout title="Browse All Used Bookstores - BookDir Canada">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-76NCEMZPLV"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-76NCEMZPLV');
-    </script>
-  </head>
-  <header 
-    class="relative bg-gradient-to-r from-primary to-accent"
-    role="banner"
-    style="background: linear-gradient(rgba(102,126,234,0.7), rgba(118,75,162,0.7)), url('/images/bookstore-hero.jpg') center/cover no-repeat;">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-8 sm:pb-12 relative z-10">
-      <div class="text-center">
-        <!-- Logo/Brand -->
-        <div class="flex justify-center items-center mb-2">
-          <img src="/images/logo.png" alt="Born Again Books logo" style="width: 250px; height: 250px; object-fit: contain;" />
-        </div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
-          Browse All <span class="block text-text">Used Bookstores</span>
-        </h1>
-        <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
-          Discover {sortedStores.length} used bookstores across Canada. Filter by province, city, or search by name to find your next read.
-        </p>
-        <!-- Quick Stats -->
-        <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
-            <div class="text-2xl sm:text-3xl font-bold text-text">{sortedStores.length}</div>
-            <div class="text-sm text-text">Bookstores</div>
+  <main id="main-content">
+    <section 
+      class="relative bg-gradient-to-r from-primary to-accent"
+      role="banner"
+      style="background: linear-gradient(rgba(102,126,234,0.7), rgba(118,75,162,0.7)), url('/images/bookstore-hero.jpg') center/cover no-repeat;">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-8 sm:pb-12 relative z-10">
+        <div class="text-center">
+          <!-- Logo/Brand -->
+          <div class="flex justify-center items-center mb-2">
+            <img src="/images/logo.png" alt="Born Again Books logo" style="width: 250px; height: 250px; object-fit: contain;" />
           </div>
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
-            <div class="text-2xl sm:text-3xl font-bold text-text">13</div>
-            <div class="text-sm text-text">Provinces & Territories</div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-text">
+            Browse All <span class="block text-text">Used Bookstores</span>
+          </h1>
+          <p class="text-xl sm:text-2xl text-text max-w-3xl mx-auto mb-8 leading-relaxed">
+            Discover {sortedStores.length} used bookstores across Canada. Filter by province, city, or search by name to find your next read.
+          </p>
+          <!-- Quick Stats -->
+          <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-10">
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
+              <div class="text-2xl sm:text-3xl font-bold text-text">{sortedStores.length}</div>
+              <div class="text-sm text-text">Bookstores</div>
+            </div>
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
+              <div class="text-2xl sm:text-3xl font-bold text-text">13</div>
+              <div class="text-sm text-text">Provinces & Territories</div>
+            </div>
+            <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
+              <div class="text-2xl sm:text-3xl font-bold text-text">100%</div>
+              <div class="text-sm text-text">Used</div>
+            </div>
           </div>
-          <div class="bg-secondary bg-opacity-20 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg" style="box-shadow: 0 6px 24px 0 rgba(0,0,0,0.4);">
-            <div class="text-2xl sm:text-3xl font-bold text-text">100%</div>
-            <div class="text-sm text-text">Used</div>
+          <!-- Action Button -->
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button 
+              id="find-near-me"
+              type="button"
+              class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-2xl focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
+              style="box-shadow: 0 12px 48px 0 rgba(0,0,0,0.8);"
+              aria-label="Find stores near me"
+            >
+              Find Stores Near Me
+            </button>
           </div>
-        </div>
-        <!-- Action Button -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button 
-            id="find-near-me"
-            type="button"
-            class="inline-flex items-center px-8 py-3 bg-accent hover:bg-primary text-secondary font-semibold rounded-full transition-colors shadow-2xl focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
-            style="box-shadow: 0 12px 48px 0 rgba(0,0,0,0.8);"
-            aria-label="Find stores near me"
-          >
-            Find Stores Near Me
-          </button>
         </div>
       </div>
-    </div>
-    <!-- Decorative wave -->
-    <div class="relative">
-      <svg class="absolute bottom-0 w-full h-20" viewBox="0 0 1000 100" preserveAspectRatio="none" style="display: block;">
-        <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z" fill="#F6E9DD" />
-      </svg>
-    </div>
-  </header>
-  <main id="main-content">
+      <!-- Decorative wave -->
+      <div class="relative">
+        <svg class="absolute bottom-0 w-full h-20" viewBox="0 0 1000 100" preserveAspectRatio="none" style="display: block;">
+          <path d="M0,100 C150,0 350,0 500,50 C650,100 850,100 1000,0 L1000,100 Z" fill="#F6E9DD" />
+        </svg>
+      </div>
+    </section>
     <section class="py-8 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-gray-50 rounded-lg p-6">
@@ -227,7 +216,7 @@ const sortedStores = stores.sort((a, b) => a.name.localeCompare(b.name));
         </div>
       </div>
     </section>
+    <script type="module" src="/js/store-filters.js"></script>
+    <GeoButtonsScript />
   </main>
-  <script type="module" src="/js/store-filters.js"></script>
-  <GeoButtonsScript />
 </Layout> 
