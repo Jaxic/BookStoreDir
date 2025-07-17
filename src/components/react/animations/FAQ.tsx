@@ -39,7 +39,7 @@ const FAQ: React.FC<Props> = ({ faqs }) => {
   return (
     <section ref={sectionRef} className="faq-section py-32 px-4 max-w-4xl mx-auto">
       <h2 className="faq-title text-center font-black text-[clamp(3rem,8vw,6rem)] mb-16">
-        Frequently Asked <span className="gradient-text">Questions</span>
+        <span className="text-white">Frequently Asked </span><span className="gradient-text">Questions</span>
       </h2>
       <div className="faq-grid space-y-6">
         {faqs.map((faq, i) => (

@@ -54,8 +54,68 @@ const DynamicHero: React.FC<DynamicHeroProps> = ({ storeCount }) => {
       }
     });
 
+    // Attach geolocation handler for 'Find Near Me'
+    const btn = document.getElementById('find-near-me');
+    if (btn) {
+      btn.addEventListener('click', async function handler(e) {
+        e.preventDefault();
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+          alert('Geolocation only works on HTTPS or localhost. Please use a secure connection.');
+          return;
+        }
+        if (!navigator.geolocation) {
+          alert('Geolocation is not supported by your browser.');
+          return;
+        }
+        (btn as HTMLButtonElement).disabled = true;
+        btn.textContent = 'Locating...';
+        navigator.geolocation.getCurrentPosition(
+          async function(position) {
+            const { latitude, longitude } = position.coords;
+            try {
+              const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+              const res = await fetch(url);
+              const data = await res.json();
+              const city = data.address.city || data.address.town || data.address.village || data.address.hamlet;
+              const province = data.address.state || data.address.region;
+              function slugify(str: string) {
+                return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+              }
+              if (province) {
+                const provinceSlug = slugify(province);
+                if (city) {
+                  const citySlug = slugify(city);
+                  window.location.href = `/${provinceSlug}/${citySlug}`;
+                } else {
+                  window.location.href = `/${provinceSlug}`;
+                }
+              } else {
+                alert('Could not determine your province.');
+              }
+            } catch (e) {
+              alert('Could not determine your location.');
+              console.error(e);
+            }
+            (btn as HTMLButtonElement).disabled = false;
+            btn.textContent = 'Find Near Me';
+          },
+          function(error) {
+            if (error.code === error.PERMISSION_DENIED) {
+              alert('Location permission denied. Please allow access to use this feature.');
+            } else {
+              alert('Unable to retrieve your location.');
+            }
+            (btn as HTMLButtonElement).disabled = false;
+            btn.textContent = 'Find Near Me';
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
+    }
+
     return () => {
       tl.kill();
+      if (btn) btn.replaceWith(btn.cloneNode(true)); // Remove event listener
     };
   }, []);
 
@@ -99,21 +159,22 @@ const DynamicHero: React.FC<DynamicHeroProps> = ({ storeCount }) => {
           className="hero-cta flex flex-col sm:flex-row gap-4 justify-center items-center opacity-0 translate-y-8"
         >
           <a
-            href="#bookstores"
+            href="/stores"
             className="cta-button bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
             tabIndex={0}
             aria-label="Explore Bookstores"
           >
             Explore Bookstores
           </a>
-          <a
-            href="#bookstores"
+          <button
+            id="find-near-me"
+            type="button"
             className="cta-button bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
             tabIndex={0}
             aria-label="Find Near Me"
           >
             Find Near Me
-          </a>
+          </button>
         </div>
       </div>
       <style
