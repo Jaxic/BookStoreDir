@@ -31,8 +31,8 @@ const WhyChoose: React.FC = () => {
     }, {
       y: 0,
       opacity: 1,
-      duration: 1,
-      stagger: 0.2,
+      duration: 0.5,
+      stagger: 0.1,
       ease: 'power3.out',
       scrollTrigger: {
         trigger: sectionRef.current,
