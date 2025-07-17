@@ -15,23 +15,23 @@ const DynamicHero: React.FC<DynamicHeroProps> = ({ storeCount }) => {
     const tl = gsap.timeline();
     // Animate title words
     tl.from('.hero-word', {
-      duration: 1.2,
+      duration: 0.8, // faster
       y: '100%',
-      stagger: 0.2,
+      stagger: 0.12, // faster stagger
       ease: 'power4.out'
     })
       .to(subtitleRef.current, {
-        duration: 1,
+        duration: 0.6, // faster
         opacity: 1,
         y: 0,
         ease: 'power2.out'
-      }, '-=0.5')
+      }, '-=0.3') // overlap more
       .to(ctaRef.current, {
-        duration: 0.8,
+        duration: 0.5, // faster
         opacity: 1,
         y: 0,
         ease: 'power2.out'
-      }, '-=0.3');
+      }, '-=0.2'); // overlap more
 
     // Parallax effect on scroll
     gsap.to('.hero-bg', {

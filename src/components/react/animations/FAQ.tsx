@@ -38,14 +38,10 @@ const FAQ: React.FC<Props> = ({ faqs }) => {
 
   return (
     <section ref={sectionRef} className="faq-section py-32 px-4 max-w-4xl mx-auto">
-      <div className="flex justify-center mb-16">
-        <div className="bg-black/60 rounded-2xl px-8 py-6 inline-block shadow-lg">
-          <h2 className="faq-title text-center font-black text-[clamp(2.5rem,6vw,4rem)] m-0">
-            <span className="text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>Frequently Asked </span>
-            <span className="gradient-text">Questions</span>
-          </h2>
-        </div>
-      </div>
+      <h2 className="faq-title text-center font-black text-[clamp(2.5rem,6vw,4rem)] mb-16" style={{textShadow: '0 2px 8px rgba(0,0,0,0.18)'}}>
+        <span className="text-white">Frequently Asked </span>
+        <span className="gradient-text">Questions</span>
+      </h2>
       <div className="faq-grid space-y-6">
         {faqs.map((faq, i) => (
           <div
