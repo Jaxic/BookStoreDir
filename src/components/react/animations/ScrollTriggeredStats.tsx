@@ -91,7 +91,7 @@ const ScrollTriggeredStats: React.FC<Props> = ({ provinces }) => {
                   0
                 </div>
                 <div className="stat-label text-xl font-light text-gray-200 mb-2">
-                  Bookstores
+                  Used Bookstores
                 </div>
                 <div className="stat-location text-2xl font-bold text-white">
                   {province.name}
