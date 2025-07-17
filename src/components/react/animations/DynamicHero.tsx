@@ -66,7 +66,7 @@ const DynamicHero: React.FC<DynamicHeroProps> = ({ storeCount }) => {
       aria-label="Hero section"
     >
       {/* Background with parallax and gradient overlay */}
-      <div className="hero-bg absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop')] bg-cover bg-center">
+      <div className="hero-bg absolute inset-0 z-0 bg-[url('/images/bookstore-hero.jpg')] bg-cover bg-center">
         <div className="absolute inset-0 bg-gradient-radial from-blue-900/30 via-purple-900/20 to-black" />
       </div>
 

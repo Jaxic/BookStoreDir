@@ -46,10 +46,10 @@ const FAQ: React.FC<Props> = ({ faqs }) => {
           <div
             key={faq.question}
             ref={el => { if (el) itemsRef.current[i] = el; }}
-            className={`faq-item bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8 transition-all duration-300 ${openIndex === i ? 'border-blue-400/40' : ''}`}
+            className={`faq-item bg-gray-900/80 border border-white/15 rounded-xl p-8 transition-all duration-300 text-white shadow-lg ${openIndex === i ? 'border-blue-400/60 ring-2 ring-blue-400/30' : ''}`}
           >
             <button
-              className="faq-question w-full text-left text-xl font-semibold text-white flex justify-between items-center focus:outline-none"
+              className="faq-question w-full text-left text-xl font-semibold text-white flex justify-between items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
               aria-expanded={openIndex === i}
               aria-controls={`faq-panel-${i}`}
               onClick={() => setOpenIndex(openIndex === i ? null : i)}
@@ -59,7 +59,7 @@ const FAQ: React.FC<Props> = ({ faqs }) => {
             </button>
             <div
               id={`faq-panel-${i}`}
-              className={`faq-answer text-white/80 mt-4 transition-all duration-300 ${openIndex === i ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
+              className={`faq-answer text-gray-200 mt-4 transition-all duration-300 ${openIndex === i ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
               aria-hidden={openIndex !== i}
             >
               {faq.answer}
